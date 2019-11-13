@@ -1,0 +1,27 @@
+Package: epinetr
+Title: Epistastic Network Modelling with Forward-Time Simulation
+Version: 0.0.0.9000
+Authors@R: c(
+  person("Dion", "Detterer", email = "ddettere@myune.edu.au", role = c("aut", "cre")),
+  person("Paul", "Kwan", email = "wkwan2@une.edu.au", role = "aut"),
+  person("Cedric", "Gondro", email = "gondroce@msu.edu", role = "aut"))
+Description: Allows for forward-in-time simulation of epistatic networks with associated
+    phenotypic output.
+Depends: R (>= 2.10)
+License: GPL (>=3)
+Encoding: UTF-8
+LazyData: true
+Imports: 
+    GA (>= 3.2),
+    ggplot2 (>= 3.1.1),
+    reshape2 (>= 1.4.3),
+    vcfR (>= 1.8.0),
+    Rcpp (>= 0.12.18)
+RoxygenNote: 6.1.1
+Suggests: 
+    knitr,
+    rmarkdown,
+    testthat
+VignetteBuilder: knitr
+LinkingTo: 
+    Rcpp
