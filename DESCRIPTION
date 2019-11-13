@@ -7,6 +7,8 @@ Authors@R: c(
   person("Cedric", "Gondro", email = "gondroce@msu.edu", role = "aut"))
 Description: Allows for forward-in-time simulation of epistatic networks with associated
     phenotypic output.
+URL: http://github.com/diondetterer/epinetr
+BugReports: http://github.com/diondetterer/epinetr/issues
 Depends: R (>= 2.10)
 License: GPL (>=3)
 Encoding: UTF-8
