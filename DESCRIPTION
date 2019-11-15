@@ -16,9 +16,11 @@ LazyData: true
 Imports: 
     GA (>= 3.2),
     ggplot2 (>= 3.1.1),
+    igraph (>= 1.2.4),
+    methods (>= 2.10),
+    Rcpp (>= 0.12.18),
     reshape2 (>= 1.4.3),
-    vcfR (>= 1.8.0),
-    Rcpp (>= 0.12.18)
+    vcfR (>= 1.8.0)
 RoxygenNote: 6.1.1
 Suggests: 
     knitr,

@@ -12,9 +12,9 @@
 #' @docType package
 #' @author Dion Detterer, Paul Kwan, Cedric Gondro
 #' @importFrom graphics title
-#' @importFrom methods is
 #' @importFrom Rcpp sourceCpp
 #' @importFrom stats cov rnorm runif sd var
+#' @importFrom methods is
 #' @importFrom utils combn
 #' @useDynLib epinetr, .registration = TRUE
 #' @name epinetr

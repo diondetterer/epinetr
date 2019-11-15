@@ -36,3 +36,7 @@ inst/doc
 
 # R Environment Variables
 .Renviron
+
+# Vignette workaround
+doc
+Meta
