@@ -198,12 +198,14 @@ fitRnd <- function(vec, fun, ..., tolerance = 0.005, iter.max = 1000) {
 #' # Load genotype file
 #' filename <- system.file("extdata", "geno.epi", package = "epinetr")
 #' geno <- loadGeno(filename)
-#' 
+#'
 #' # Use genotypes as basis for new population
 #' pop <- Population(
 #'   map = map100snp, QTL = 20, genotypes = geno,
 #'   broadH2 = 0.8, narrowh2 = 0.6, traitVar = 40
 #' )
+#'
+#' @seealso \code{\link{Population}}
 loadGeno <- function(filename) {
   geno <- getSerialMat(filename)
 

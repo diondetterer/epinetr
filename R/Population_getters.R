@@ -21,7 +21,7 @@
 #'   broadH2 = 0.9, narrowh2 = 0, traitVar = 40
 #' )
 #' pop <- attachEpiNet(pop)
-#' 
+#'
 #' # Plot epistatic network
 #' epiNet <- getEpiNet(pop)
 #' plot(epiNet)
@@ -58,18 +58,18 @@ getEpiNet <- function(pop) {
 #'   alleleFrequencies = runif(100),
 #'   broadH2 = 0.9, narrowh2 = 0, traitVar = 40
 #' )
-#' 
+#'
 #' # Attach random epistatic network and retrieve incidence matrix
 #' pop <- attachEpiNet(pop)
 #' inc <- getIncMatrix(pop)
-#' 
+#'
 #' # Create second population
 #' pop2 <- Population(
 #'   popSize = 200, map = map100snp, QTL = 20,
 #'   alleleFrequencies = runif(100),
 #'   broadH2 = 0.8, narrowh2 = 0.6, traitVar = 40
 #' )
-#' 
+#'
 #' # Attach epistatic network to second population
 #' # using incidence matrix from first
 #' pop2 <- attachEpiNet(pop2, incmat = inc)
@@ -111,7 +111,7 @@ getIncMatrix <- function(pop) {
 #'   alleleFrequencies = runif(100),
 #'   broadH2 = 0.9, narrowh2 = 0.6, traitVar = 40
 #' )
-#' 
+#'
 #' # Get the SNP IDs of the QTLs
 #' getQTL(pop)
 #' @seealso \code{\link{Population}}
@@ -155,13 +155,13 @@ getQTL <- function(pop) {
 #' )
 #' pop <- addEffects(pop)
 #' pop <- attachEpiNet(pop)
-#' 
+#'
 #' # Run the simulator
 #' pop2 <- runSim(pop, generations = 150)
-#' 
+#'
 #' # Retrieve the population pedigree from the simulation
 #' ped <- getPedigree(pop2)
-#' 
+#'
 #' # Re-run the simulation using the same pedigree
 #' pop3 <- runSim(pop, ped)
 #' @seealso \code{\link{runSim}}
@@ -196,10 +196,10 @@ getPedigree <- function(pop) {
 #' )
 #' pop <- addEffects(pop)
 #' pop <- attachEpiNet(pop)
-#' 
+#'
 #' # Run the simulator
 #' pop2 <- runSim(pop, generations = 150)
-#' 
+#'
 #' af <- getAlleleFreqRun(pop2)
 #' @seealso \code{\link{runSim}}
 getAlleleFreqRun <- function(pop) {
@@ -230,7 +230,7 @@ getAlleleFreqRun <- function(pop) {
 #'   alleleFrequencies = runif(100),
 #'   broadH2 = 0.9, narrowh2 = 0.6, traitVar = 40
 #' )
-#' 
+#'
 #' # Retrieve genotypes
 #' geno <- getGeno(pop)
 #' @seealso \code{\link{Population}}
@@ -269,11 +269,13 @@ getGeno <- function(pop) {
 #'   alleleFrequencies = runif(100, 0.05, 0.5)
 #' )
 #' pop <- addEffects(pop)
-#' 
+#'
 #' # Find the additive contribution to the individuals' phenotypes
 #' hap <- getHaplo(pop)
 #' hap <- (hap[[1]] + hap[[2]])[, getQTL(pop)$Index]
 #' (hap %*% getAddCoefs(pop))[, 1] + getAddOffset(pop)
+#'
+#' @seealso \code{\link{getAddCoefs}}, \code{\link{getAddOffset}}
 getHaplo <- function(pop) {
   testPop(pop)
 
@@ -306,7 +308,7 @@ getHaplo <- function(pop) {
 #' )
 #' pop <- addEffects(pop)
 #' pop <- attachEpiNet(pop)
-#' 
+#'
 #' # Retrieve phenotypic components from population
 #' components <- getComponents(pop)
 #' @seealso \code{\link{Population}}, \code{\link{addEffects}},
@@ -349,7 +351,7 @@ getComponents <- function(pop) {
 #'   broadH2 = 0.6, narrowh2 = 0.6, traitVar = 40
 #' )
 #' pop <- addEffects(pop)
-#' 
+#'
 #' # Get additive coefficients
 #' additive <- getAddCoefs(pop)
 #' @seealso \code{\link{addEffects}}
@@ -388,27 +390,30 @@ getAddCoefs <- function(pop) {
 #'   alleleFrequencies = runif(100), broadH2 = 0.7,
 #'   narrowh2 = 0.45, traitVar = 40
 #' )
-#' 
+#'
 #' # Attach additive effects
 #' pop <- addEffects(pop)
-#' 
+#'
 #' # Attach a network of epistatic effects
 #' pop <- attachEpiNet(pop)
-#' 
+#'
 #' # Retrieve the possible values for the first two-way interaction
 #' getInteraction(pop, 1)
-#' 
+#'
 #' # Retrieve the value for the case where, in the fourth two-way
 #' # interaction, the first QTL in the interaction is heterozygous
 #' # and the second QTL in the interaction is the homozygous
 #' # reference genotype.
 #' getInteraction(pop, 4)[2, 1]
-#' 
+#'
 #' # Retrieve the value for the case where, in the second two-way
 #' # interaction, the first QTL in the interaction is the homozygous
 #' # reference genotype and the second QTL in the interaction is the
 #' # homozygous alternative genotype.
 #' getInteraction(pop, 2)[1, 3]
+#'
+#' @seealso \code{\link{attachEpiNet}}
+#'
 #' @export
 getInteraction <- function(pop, n) {
   testPop(pop)
@@ -451,12 +456,15 @@ getInteraction <- function(pop, n) {
 #'   alleleFrequencies = runif(100, 0.05, 0.5)
 #' )
 #' pop <- attachEpiNet(pop)
-#' 
+#'
 #' # Find the epistatic contribution to the individuals' phenotypes
 #' rowSums(getEpistasis(pop)) + getEpiOffset(pop)
-#' 
+#'
 #' # Compare with epistatic component from getComponents()
 #' getComponents(pop)$Epistatic
+#'
+#' @seealso \code{\link{getEpiOffset}}
+#'
 #' @export
 getEpistasis <- function(pop, scale = TRUE, geno = NULL) {
   testPop(pop)
@@ -518,14 +526,16 @@ getEpistasis <- function(pop, scale = TRUE, geno = NULL) {
 #'   alleleFrequencies = runif(100, 0.05, 0.5)
 #' )
 #' pop <- addEffects(pop)
-#' 
+#'
 #' # Find the additive contribution to the individuals' phenotypes
 #' hap <- getHaplo(pop)
 #' hap <- (hap[[1]] + hap[[2]])[, getQTL(pop)$Index]
 #' (hap %*% getAddCoefs(pop))[, 1] + getAddOffset(pop)
-#' 
+#'
 #' # Compare with additive component from getComponents()
 #' getComponents(pop)$Additive
+#'
+#' @seealso \code{\link{getAddCoefs}}, \code{\link{addEffects}}
 getAddOffset <- function(pop) {
   testPop(pop)
 
@@ -557,12 +567,14 @@ getAddOffset <- function(pop) {
 #'   alleleFrequencies = runif(100, 0.05, 0.5)
 #' )
 #' pop <- attachEpiNet(pop)
-#' 
+#'
 #' # Find the epistatic contribution to the individuals' phenotypes
 #' rowSums(getEpistasis(pop)) + getEpiOffset(pop)
-#' 
+#'
 #' # Compare with epistatic component from getComponents()
 #' getComponents(pop)$Epistatic
+#'
+#' @seealso \code{\link{getEpistasis}}
 getEpiOffset <- function(pop) {
   testPop(pop)
 

@@ -54,6 +54,10 @@ getInteraction(pop, 4)[2, 1]
 # reference genotype and the second QTL in the interaction is the
 # homozygous alternative genotype.
 getInteraction(pop, 2)[1, 3]
+
+}
+\seealso{
+\code{\link{attachEpiNet}}
 }
 \author{
 Dion Detterer, Paul Kwan, Cedric Gondro

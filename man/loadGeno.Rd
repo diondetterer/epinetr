@@ -30,6 +30,10 @@ pop <- Population(
   map = map100snp, QTL = 20, genotypes = geno,
   broadH2 = 0.8, narrowh2 = 0.6, traitVar = 40
 )
+
+}
+\seealso{
+\code{\link{Population}}
 }
 \author{
 Dion Detterer, Paul Kwan, Cedric Gondro

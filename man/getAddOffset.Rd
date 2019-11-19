@@ -38,6 +38,10 @@ hap <- (hap[[1]] + hap[[2]])[, getQTL(pop)$Index]
 
 # Compare with additive component from getComponents()
 getComponents(pop)$Additive
+
+}
+\seealso{
+\code{\link{getAddCoefs}}, \code{\link{addEffects}}
 }
 \author{
 Dion Detterer, Paul Kwan, Cedric Gondro
