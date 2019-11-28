@@ -53,13 +53,15 @@ Finally, plot the run:
 plot(pop)
 ```
 
-## Contributing
-We welcome contributions to the project; please see the project wiki for details on the codebase.
-
-## License
-*epinetr* is released under the GPLv3 license. See the file `LICENSE` for more details.
-
 ## Authors and support
 Dion Detterer, Paul Kwan and Cedric Gondro wrote the *epinetr* package, with Dion as the maintainer.
 
 Issues can be reported via the issue tab, or you can email Dion at ddettere@myune.edu.au for assistance.
+
+## Contributing
+We welcome contributions to the project; please see the project wiki for details on the codebase.
+
+For advice on setting up an appropriate R development environment, see Hadley Wickham's advice on system setup at https://r-pkgs.org/setup.html
+
+## License
+*epinetr* is released under the GPLv3 license. See the file `LICENSE` for more details.
