@@ -1,5 +1,10 @@
 # epinetr
-An R Package for Epistasis and Epistastic Network Modelling with Forward-Time Simulation
+An R Package for Epistastic Network Modelling with Forward-Time Simulation
+
+## About this project
+*epinetr* is a package for the R statistical computing environment designed to facilitate the modelling of epistasis and epistatic networks of arbitrary complexity in populations across generations. Our hope is that this software will aid researchers in uncovering the genetic architecture of complex traits and bridging the conceptual divide between quantitative and molecular genetics.
+
+Using *epinetr*, you can test  the impacts of various mixes of additive and epistatic effects against different population structures and selection criteria on populations. Our primary goal is to investigate the relationship between biological epistasis in individuals and additive models in populations.
 
 ## Installation
 Installation is straightforward, provided you already have the `devtools` package installed. Simply run the command
@@ -11,7 +16,7 @@ install_github("diondetterer/epinetr")
 and the *epinetr* package will be installed into your R library.
 
 ## Usage
-There are a vignette and a demo in the package, and we encourage users to read the vignette at least, as it provides a fairly comprehensive tutorial. However, here are some minimal commands to get you started:
+There is a vignette in the package which provides a fairly comprehensive tutorial, and we encourage all users to read it. However, here are some minimal commands to get you started:
 
 ```r
 pop <- Population(
@@ -47,3 +52,7 @@ Finally, plot the run:
 ```r
 plot(pop)
 ```
+
+## Contributing
+We welcome contributions to the project; please see the project wiki for details on the codebase.
+
