@@ -1,36 +1,29 @@
 # Add size parameter to population
 addPopSize <- function(pop, pop2, popSize, genotypes, literal) {
+  # Check that genotypes is a matrix, if given
   if (!is.null(genotypes) && !is.matrix(genotypes)) {
     stop("genotypes must be supplied via a matrix")
   }
 
-  # If population size is not explicitly given
-  if (is.null(popSize)) {
-    # Use the old population size, if given, unless genotypes are given and
-    # literal is TRUE
-    if (!is.null(pop$popSize)) {
-      if (!is.null(genotypes) && literal) {
-        popSize <- nrow(genotypes)
-      } else {
-        popSize <- pop$popSize
-      }
-
-      # Use genotypes if given when there is no other source of population
-      # size
-    } else if (!is.null(genotypes)) {
-      popSize <- nrow(genotypes)
-    } else {
-      stop("Population size not given")
+  # Use explicit popSize if given
+  if (!is.null(popSize)) {
+    if (length(popSize) != 1 || !is.numeric(popSize) || popSize %% 1 != 0 ||
+        popSize < 2) {
+      stop("popSize must be a single integer greater than 1")
     }
-  }
 
-  # Check validity
-  if (length(popSize) != 1 || !is.numeric(popSize) || popSize %% 1 != 0 ||
-    popSize < 2) {
-    stop("popSize must be a single integer greater than 1")
-  }
+    pop2$popSize <- popSize
 
-  pop2$popSize <- popSize
+  # Use literal genotypes to infer population size
+  } else if (!is.null(genotypes) && literal) {
+    pop2$popSize <- nrow(genotypes)
+
+  # Use previous population's size
+  } else if (!is.null(pop$popSize)) {
+    pop2$popSize <- pop$popSize
+  } else {
+    stop("Population size not given")
+  }
 
   return(pop2)
 }

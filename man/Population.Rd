@@ -37,13 +37,13 @@ on the allele frequencies of the given genotypes}
 generating genotypes}
 
 \item{broadH2}{initial broad-sense heritability within the new
-\code{Population}.}
+\code{Population}}
 
 \item{narrowh2}{initial narrow-sense heritability within the new
-\code{Population}.}
+\code{Population}}
 
 \item{traitVar}{initial phenotypic variance within the new
-\code{Population}.}
+\code{Population}}
 }
 \value{
 The constructor creates a new object of class

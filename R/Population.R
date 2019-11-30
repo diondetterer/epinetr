@@ -76,11 +76,11 @@
 #' @param alleleFrequencies an optional vector of allele frequencies for
 #' generating genotypes
 #' @param broadH2 initial broad-sense heritability within the new
-#' \code{Population}.
+#' \code{Population}
 #' @param narrowh2 initial narrow-sense heritability within the new
-#' \code{Population}.
+#' \code{Population}
 #' @param traitVar initial phenotypic variance within the new
-#' \code{Population}.
+#' \code{Population}
 #'
 #' @return The constructor creates a new object of class
 #' \code{'Population'}.
@@ -94,27 +94,27 @@
 #' # frequencies and 20 QTLs chosen at random, broad-sense
 #' # heritability set to 0.9, narrow-sense heritability set to 0.75
 #' # and overall trait variance set to 40.
-#' 
+#'
 #' pop <- Population(
 #'   popSize = 500, map = map100snp, QTL = 20,
 #'   alleleFrequencies = runif(100), broadH2 = 0.9,
 #'   narrowh2 = 0.75, traitVar = 40
 #' )
-#' 
+#'
 #' # Construct a new population of size 500 using directly supplied
 #' # genotypes and 20 QTLs chosen at random, broad-sense heritability
 #' # set to 0.7, narrow-sense heritability set to 0.3 and overall
 #' # trait variance set to 10.
-#' 
+#'
 #' pop2 <- Population(
 #'   map = map100snp, genotypes = geno100snp,
 #'   literal = TRUE, QTL = 20,
 #'   broadH2 = 0.7, narrowh2 = 0.3, traitVar = 10
 #' )
-#' 
+#'
 #' # Modify the previous population to have narrow-sense heritabilty
 #' # set to 0.45 and overall trait variance set to 20.
-#' 
+#'
 #' pop2 <- Population(pop2, narrowh2 = 0.45, traitVar = 20)
 #' @seealso \code{\link{addEffects}}, \code{\link{attachEpiNet}},
 #' \code{\link{print.Population}}

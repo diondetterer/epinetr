@@ -1,6 +1,14 @@
 context("Population constructor")
 library(epinetr)
 
+test_that("New popSize overrides genotypes", {
+  popSizeGiven = nrow(geno100snp) - 5
+  pop = Population(popSize = popSizeGiven, map=map100snp, QTL=20, genotypes = geno100snp, broadH2 = 0.9,
+                   narrowh2 = 0.6, traitVar = 40)
+  popSize = nrow(getGeno(pop))
+  expect_equal(popSizeGiven, popSize)
+})
+
 test_that("New population size overrides old", {
   pop1 = Population(popSize = 10, map=map100snp, QTL=20, alleleFrequencies = runif(100), broadH2 = 0.9,
                     narrowh2 = 0.6, traitVar = 40)
@@ -9,26 +17,11 @@ test_that("New population size overrides old", {
   expect_equal(popSize, 8)
 })
 
-test_that("New population size overrides number of genotypes given", {
-  popSizeGiven = nrow(geno100snp) - 5
-  pop = Population(popSize = popSizeGiven, map=map100snp, QTL=20, genotypes = geno100snp, broadH2 = 0.9,
-                   narrowh2 = 0.6, traitVar = 40)
-  popSize = nrow(getGeno(pop))
-  expect_equal(popSizeGiven, popSize)
-})
-
 test_that("Number of rows in genotypes overrides old popSize if literal is TRUE", {
   pop1 = Population(popSize = 10, map=map100snp, QTL=20, alleleFrequencies = runif(100), broadH2 = 0.9,
                     narrowh2 = 0.6, traitVar = 40)
   pop2 = Population(pop1, genotypes = geno100snp, literal = TRUE)
   popSize = nrow(getGeno(pop2))
-  expect_equal(popSize, nrow(geno100snp))
-})
-
-test_that("Number of rows in genotypes acts as a fallback", {
-  pop = Population(map = map100snp, QTL = 20, genotypes = geno100snp, literal = FALSE, broadH2 = 0.9,
-                   narrowh2 = 0.6, traitVar = 40)
-  popSize = nrow(getGeno(pop))
   expect_equal(popSize, nrow(geno100snp))
 })
 
