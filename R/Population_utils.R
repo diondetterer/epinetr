@@ -163,7 +163,7 @@ addHaplotypes <- function(pop, pop2, genotypes, literal, alleleFrequencies) {
     }
 
     # Use existing haplotypes
-    pop2 <- hapLogic(pop2, pop$hap, literal)
+    pop2 <- hapLogic(pop2, geno2hap(getGeno(pop)), literal)
   } else {
     stop("Genotypes or allele frequencies not specified.")
   }
