@@ -59,7 +59,7 @@ Dion Detterer, Paul Kwan and Cedric Gondro wrote the *epinetr* package, with Dio
 Issues can be reported via the issue tab, or you can email Dion at ddettere@myune.edu.au for assistance.
 
 ## Contributing
-We welcome contributions to the project; please see the project wiki for details on the codebase.
+We welcome contributions to the project; please see the [project wiki](https://github.com/diondetterer/epinetr/wiki) for details on the codebase.
 
 For advice on setting up an appropriate R development environment, see Hadley Wickham's advice on system setup at https://r-pkgs.org/setup.html
 
