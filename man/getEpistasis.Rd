@@ -42,7 +42,6 @@ rowSums(getEpistasis(pop)) + getEpiOffset(pop)
 
 # Compare with epistatic component from getComponents()
 getComponents(pop)$Epistatic
-
 }
 \seealso{
 \code{\link{getEpiOffset}}

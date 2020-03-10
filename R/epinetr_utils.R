@@ -45,13 +45,18 @@ updatePedigree <- function(pop) {
   # Store total phenotypic value for each member of the population
   pop$phenotype <- pheno[, 4]
 
+  sex <- pop$isMale
+  sex[pop$isMale] <- "M"
+  sex[!pop$isMale] <- "F"
+
   pop$ped <- data.frame(ID = pop$ID, Sire = rep(0, pop$popSize), Dam = rep(
     0,
     pop$popSize
-  ), Additive = pheno[, 1], Epistatic = pheno[, 2], Environmental = pheno[
+  ), Additive = pheno[, 1], Epistatic = pheno[, 2], Environmental = pheno
+  [
     ,
     3
-  ], Phenotype = pheno[, 4])
+  ], Phenotype = pheno[, 4], Sex = sex)
 
   return(pop)
 }
@@ -198,13 +203,12 @@ fitRnd <- function(vec, fun, ..., tolerance = 0.005, iter.max = 1000) {
 #' # Load genotype file
 #' filename <- system.file("extdata", "geno.epi", package = "epinetr")
 #' geno <- loadGeno(filename)
-#'
+#' 
 #' # Use genotypes as basis for new population
 #' pop <- Population(
 #'   map = map100snp, QTL = 20, genotypes = geno,
 #'   broadH2 = 0.8, narrowh2 = 0.6, traitVar = 40
 #' )
-#'
 #' @seealso \code{\link{Population}}
 loadGeno <- function(filename) {
   geno <- getSerialMat(filename)

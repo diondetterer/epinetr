@@ -52,9 +52,7 @@ recombine <- function(hap1, hap2, recProb) {
 
 # Linear ranking function
 ranking <- function(n) {
-  r <- 1 / (n + 1)
-  p <- seq(from = 1 - r, to = r, by = -r)
-  return(p / sum(p))
+  return(2 * (n - 1:n + 1) / (n * (n + 1)))
 }
 
 
@@ -82,14 +80,33 @@ prepPed <- function(pedigree) {
       stop("No IDs can be repeated within the same row.")
     }
 
+  # Ensure that no animal appears as both a sire and a dam
+  sire <- pedigree[, 2]
+  sire <- sire[sire != 0]
+  dam <- pedigree[, 3]
+  dam <- dam[dam != 0]
+  if (any(sire %in% dam) || any(dam %in% sire)) {
+    stop("No individual can be both a sire and a dam")
+  }
+
+  # Tag sires as male and dams as female
+  males <- unique(match(sire, pedigree[, 1]))
+  females <- unique(match(dam, pedigree[, 1]))
+  sex <- rep("X", nrow(pedigree))
+  sex[males] <- "M"
+  sex[females] <- "F"
+  sexless <- which(sex == "X")
+  sex[sexless] <- sample(c("M", "F"), length(sexless), replace = TRUE)
+
   pedigree <- pedigree[, 1:3]
   names(pedigree) <- c("ID", "Sire", "Dam")
   pedigree$Additive <- rep(0, length(pedigree$ID))
   pedigree$Epistatic <- rep(0, length(pedigree$ID))
   pedigree$Environmental <- rep(0, length(pedigree$ID))
   pedigree$Phenotype <- rep(0, length(pedigree$ID))
+  pedigree$Sex <- sex
 
-  return(pedigree[, 1:3])
+  return(pedigree)
 }
 
 
@@ -163,9 +180,13 @@ prepPop <- function(pop, generations, selection, burnIn, truncSire, truncDam,
   zeroes <- rep(0, pop$popSize + pop$expectedOffspring)
   tempped <- data.frame(
     ID = zeroes, Sire = zeroes, Dam = zeroes, Additive = zeroes,
-    Epistatic = zeroes, Environmental = zeroes, Phenotype = zeroes, Round = zeroes
+    Epistatic = zeroes, Environmental = zeroes, Phenotype = zeroes, Sex = as.character(rep("X", pop$popSize + pop$expectedOffspring)), Round = zeroes,
+    stringsAsFactors = FALSE
   )
-  tempped[1:pop$popSize, ] <- getComponents(pop)
+  components <- getComponents(pop)
+  components$Sex <- as.character(components$Sex)
+  tempped[1:pop$popSize, ] <- components
+  tempped$Round <- zeroes
   pop$ped <- tempped
 
   pop$ped$Round[1:pop$popSize] <- 1

@@ -2,7 +2,6 @@
 buildNetwork <- function(n, k, m, additive, scaleFree, pop) {
   retval <- constructEpiNet(n, k)
 
-  # intmat <- numeric(0)
   degree <- rep(0, n)
   network <- NULL
   tempk <- sort(k)
@@ -37,14 +36,9 @@ buildNetwork <- function(n, k, m, additive, scaleFree, pop) {
     stop("additive vector cannot have length 0")
   }
 
-  # count <- 1
   for (i in tempk) {
     incmat <- rn(degree, k = i, m = m, additive = additive, scaleFree = scaleFree)
     if (!is.null(incmat)) {
-      # network[[count]] <- incmat
-      # intmat <- cbind(intmat, getintmat(incmat, varfun))
-      # count <- count + 1
-
       network <- cbind(network, incmat)
       degree <- degree + rowSums(incmat)
     }
@@ -73,9 +67,6 @@ userNetwork <- function(incmat) {
   incmat <- round(abs(incmat))
   incmat[incmat > 0] <- 1
   incmat <- matrix(as.integer(incmat), nrow = dimensions[1], ncol = dimensions[2])
-
-  # Make the incidence matrix have successive powers of three per column
-  # net$Incidence = apply(incmat, 2, pow3vec)
   net$Incidence <- incmat
 
   # Get the seeds for the interactions
@@ -146,6 +137,7 @@ rn <- function(degree, m = 1, k = 2, additive = 0, scaleFree = FALSE) {
         prob = pp
       )]
     }
+
     for (j in 1:m) {
       # Add the new node
       incmat[nodes[i], column] <- 1
@@ -193,27 +185,4 @@ constructEpiNet <- function(n, k) {
   class(net) <- "EpiNet"
 
   return(net)
-}
-
-
-# Create an interaction matrix
-getintmat <- function(incmat, varfun) {
-  k <- sum(incmat[, 1])
-  mm <- matrix(
-    rnorm(3 * k * ncol(incmat), sd = sqrt(varfun(k) / k)), 3,
-    k * ncol(incmat)
-  )
-
-  temp <- as.vector(apply(incmat, 2, function(x) which(x == 1)))
-  colnames(mm) <- temp
-
-  return(mm)
-}
-
-
-# Make successive QTLs in a vector powers of three
-pow3vec <- function(x) {
-  index <- which(x == 1)
-  x[index] <- 3^(1:length(index) - 1)
-  return(x)
 }

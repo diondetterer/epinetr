@@ -8,17 +8,17 @@ addPopSize <- function(pop, pop2, popSize, genotypes, literal) {
   # Use explicit popSize if given
   if (!is.null(popSize)) {
     if (length(popSize) != 1 || !is.numeric(popSize) || popSize %% 1 != 0 ||
-        popSize < 2) {
+      popSize < 2) {
       stop("popSize must be a single integer greater than 1")
     }
 
     pop2$popSize <- popSize
 
-  # Use literal genotypes to infer population size
+    # Use literal genotypes to infer population size
   } else if (!is.null(genotypes) && literal) {
     pop2$popSize <- nrow(genotypes)
 
-  # Use previous population's size
+    # Use previous population's size
   } else if (!is.null(pop$popSize)) {
     pop2$popSize <- pop$popSize
   } else {
@@ -59,10 +59,7 @@ addMap <- function(pop, pop2, map) {
   }
 
   # Sort map by position within each chromosome
-  foo <- sortMap(map)
-
-  pop2$map <- foo$map
-  pop2$mapIndices <- foo$indices
+  pop2$map <- sortMap(map)
 
   return(pop2)
 }
@@ -163,15 +160,15 @@ addHaplotypes <- function(pop, pop2, genotypes, literal, alleleFrequencies) {
     }
 
     # Use existing haplotypes
-    pop2 <- hapLogic(pop2, geno2hap(getGeno(pop)), literal)
+    pop2 <- hapLogic(pop2, geno2hap(getPhased(pop)), literal)
   } else {
     stop("Genotypes or allele frequencies not specified.")
   }
 
   # Sort haplotypes and allele frequencies
-  pop2$hap[[1]] <- pop2$hap[[1]][, pop2$mapIndices]
-  pop2$hap[[2]] <- pop2$hap[[2]][, pop2$mapIndices]
-  pop2$alleleFreq <- pop2$alleleFreq[pop2$mapIndices]
+  # pop2$hap[[1]] <- pop2$hap[[1]][, pop2$mapIndices]
+  # pop2$hap[[2]] <- pop2$hap[[2]][, pop2$mapIndices]
+  # pop2$alleleFreq <- pop2$alleleFreq[pop2$mapIndices]
 
   return(pop2)
 }
@@ -237,8 +234,6 @@ addSex <- function(pop, pop2) {
 
 # Sort map by position within each chromosome
 sortMap <- function(map) {
-  # Add a column of indices
-  map$index <- 1:nrow(map)
 
   # Get a vector of chromosome IDs
   chr <- unique(map$chr)
@@ -259,24 +254,12 @@ sortMap <- function(map) {
     newmap <- rbind(newmap, tempmap)
   }
 
-  map <- newmap
-
-  # Return sorted map and original indices for each row
-  retval <- list()
-  retval$map <- newmap[, 1:3]
-  retval$indices <- newmap[, 4]
-
-  return(retval)
+  return(newmap)
 }
 
 
 # Process a genotype matrix into two haplotype matrices
 geno2hap <- function(geno) {
-
-  # Mark any 0's as NA's
-  # index <- which(geno == 0)
-  # geno[index] <- NA
-
   # Reject is there are any NAs
   if (any(is.na(geno))) {
     stop("Cannot process genotype matrix with NAs")
@@ -310,21 +293,7 @@ geno2hap <- function(geno) {
   geno <- matrix(as.integer(geno), nrow = nrow(geno), ncol = ncol(geno))
 
   # Get allele frequencies
-  alleleFrequencies <- .colMeans(geno, m = nrow(geno), n = ncol(geno))
-
-  # Swap allele coding for frequencies greater than 0.5
-  # index <- (alleleFrequencies > 0.5)
-  # geno[, index] <- abs(geno[, index] - 1)
-  # alleleFrequencies[index] <- 1 - alleleFrequencies[index]
-
-  # Estimate NA's with allele frequencies
-  # for (i in 1:ncol(geno)) {
-  #   if (any(is.na(geno[, i]))) {
-  #     index <- which(is.na(geno[, i]))
-  #     geno[index, i] <- sample(0:1, length(index), replace = TRUE,
-  #       prob = c(1 - alleleFrequencies[i], alleleFrequencies[i]))
-  #   }
-  # }
+  # alleleFrequencies <- .colMeans(geno, m = nrow(geno), n = ncol(geno))
 
   # Return list of haplotypes
   hap <- list()
@@ -384,13 +353,10 @@ addBroadH2 <- function(pop, pop2, broadH2) {
     # Grab broad-sense heritability from previous population if not
     # explicitly given
     if (is.null(pop$H2)) {
-      # stop("Broad-sense heritability not given")
       pop2$VarG <- pop2$VarP * 0.5
     } else {
       pop2$VarG <- pop2$VarP * pop$H2
     }
-
-    pop2$VarE <- pop2$VarP - pop2$VarG
   } else {
 
     # Calculate genetic and environmental variance
@@ -399,10 +365,10 @@ addBroadH2 <- function(pop, pop2, broadH2) {
       stop("Invalid broad-sense heritability")
     } else {
       pop2$VarG <- pop2$VarP * broadH2
-      pop2$VarE <- pop2$VarP - pop2$VarG
     }
   }
 
+  pop2$VarE <- pop2$VarP - pop2$VarG
   pop2$H2 <- pop2$VarG / pop2$VarP
 
   return(pop2)
@@ -416,7 +382,6 @@ addNarrowh2 <- function(pop, pop2, narrowh2) {
     # Grab narrow-sense heritability from previous population if not
     # explicitly given
     if (is.null(pop$h2)) {
-      # stop("Narrow-sense heritability not given")
       pop2$VarA <- pop2$VarP * 0.3
     } else {
       pop2$VarA <- pop2$VarP * pop$h2

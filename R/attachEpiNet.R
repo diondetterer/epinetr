@@ -40,7 +40,8 @@
 #' @param pop the \code{Population} object to which the epistatic network will
 #'   be attached
 #' @param scaleFree an optional logical value indicating whether to construct
-#'   a scale-free or random network
+#'   a network using the Barabasi-Albert model for generating scale-free
+#'   networks
 #' @param k an optional vector listing orders of interaction to include
 #' @param m an optional integer indicating the minimum number of interactions
 #'   for each QTL; see details below
@@ -110,6 +111,14 @@ attachEpiNet <- function(pop, scaleFree = FALSE, k = 2, m = 1, additive = 0,
   } else {
     pop$epiNet <- buildNetwork(n, k, m, additive, scaleFree, pop)
   }
+
+  # Set up powers of 3 in the incidence matrix
+  pow <- function(x) {
+    indices <- which(x != 0)
+    for (i in 1:length(indices)) x[indices[i]] <- 3^(i - 1)
+    return(x)
+  }
+  pop$epiNet$Incidence <- apply(pop$epiNet$Incidence, 2, pow)
 
   # Calculate offset and scaling factor for epistasis
   pop <- calcEpiScale(pop)

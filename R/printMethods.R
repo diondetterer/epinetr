@@ -61,7 +61,7 @@ print.Population <- function(x, ...) {
     )
   }
 
-  if (!is.null(x$epiNet) && x$h2 < x$H2) {
+  if (!is.null(x$epiNet) && x$H2 > x$h2) {
     cat(paste("Epistatic variance in population:", round(var(epi),
       digits = 5
     )), "\n")

@@ -33,10 +33,9 @@ pop <- addEffects(pop)
 hap <- getHaplo(pop)
 hap <- (hap[[1]] + hap[[2]])[, getQTL(pop)$Index]
 (hap \%*\% getAddCoefs(pop))[, 1] + getAddOffset(pop)
-
 }
 \seealso{
-\code{\link{getAddCoefs}}, \code{\link{getAddOffset}}
+\code{\link{getAddCoefs}}, \code{\link{getAddOffset}}, \code{\link{getPhased}}, \code{\link{getGeno}}
 }
 \author{
 Dion Detterer, Paul Kwan, Cedric Gondro

@@ -23,7 +23,7 @@
 #' argument to \code{FALSE}.
 #'
 #' The \code{genotypes} argument supplies genotypes directly. In this
-#' case, the user should supply an individual-major genotypes matrix:
+#' case, the user should supply a phased, individual-major genotypes matrix:
 #' one individual per row and two columns per single nucleotide
 #' polymorphism (SNP). Odd columns are assumed to be the haplotypes
 #' inherited from the sires, while even columns are assumed to be the
@@ -38,6 +38,12 @@
 #' SNPs should be biallelic and phased, with no missing values.
 #' Genotypes supplied directly should have variants coded as either
 #' 0 or 1.
+#'
+#' Any map (either supplied directly or via a VCF file) will be sorted,
+#' such that all SNPs along the first chromosome listed will appear at the
+#' start of the map, sorted in terms of base-pair distance; the second
+#' chromosome to appear will then be treated similarly, and so on. SNPs
+#' will be referenced within the population in this order.
 #'
 #' The \code{alleleFrequencies} argument is used when genotypes are
 #' not given directly. In this case, the \code{literal} argument has
@@ -94,27 +100,27 @@
 #' # frequencies and 20 QTLs chosen at random, broad-sense
 #' # heritability set to 0.9, narrow-sense heritability set to 0.75
 #' # and overall trait variance set to 40.
-#'
+#' 
 #' pop <- Population(
 #'   popSize = 500, map = map100snp, QTL = 20,
 #'   alleleFrequencies = runif(100), broadH2 = 0.9,
 #'   narrowh2 = 0.75, traitVar = 40
 #' )
-#'
+#' 
 #' # Construct a new population of size 500 using directly supplied
 #' # genotypes and 20 QTLs chosen at random, broad-sense heritability
 #' # set to 0.7, narrow-sense heritability set to 0.3 and overall
 #' # trait variance set to 10.
-#'
+#' 
 #' pop2 <- Population(
 #'   map = map100snp, genotypes = geno100snp,
 #'   literal = TRUE, QTL = 20,
 #'   broadH2 = 0.7, narrowh2 = 0.3, traitVar = 10
 #' )
-#'
+#' 
 #' # Modify the previous population to have narrow-sense heritabilty
 #' # set to 0.45 and overall trait variance set to 20.
-#'
+#' 
 #' pop2 <- Population(pop2, narrowh2 = 0.45, traitVar = 20)
 #' @seealso \code{\link{addEffects}}, \code{\link{attachEpiNet}},
 #' \code{\link{print.Population}}

@@ -24,10 +24,10 @@
 #' )
 #' pop <- addEffects(pop)
 #' pop <- attachEpiNet(pop)
-#'
+#' 
 #' # Run population in simulation
 #' pop <- runSim(pop)
-#'
+#' 
 #' # Plot population's run
 #' plot(pop)
 #' @seealso \code{\link{Population}}, \code{\link{runSim}},
@@ -42,7 +42,8 @@ plot.Population <- function(x, ...) {
   # Plot minimum, maximum and mean phenotypic values
   summ <- x$summaryData
 
-  summ <- data.frame(Minimum = summ[, 1], Mean = summ[, 4], Maximum = summ[
+  summ <- data.frame(Minimum = summ[, 1], Mean = summ[, 4], Maximum = summ
+  [
     ,
     6
   ])
@@ -84,7 +85,7 @@ plot.Population <- function(x, ...) {
 #'   narrowh2 = 0, traitVar = 40
 #' )
 #' pop <- attachEpiNet(pop)
-#'
+#' 
 #' # Retrieve and plot the epistatic network
 #' epinet <- getEpiNet(pop)
 #' plot(epinet)
@@ -115,7 +116,8 @@ plot.EpiNet <- function(x, ...) {
   }
 
   gg <- igraph::make_graph(xx, directed = FALSE, count)
-  igraph::V(gg)$size <- log(igraph::degree(gg) + 1.5) * 500 * sqrt(n / 50) / n / (sum(net[[length(net)]][
+  igraph::V(gg)$size <- log(igraph::degree(gg) + 1.5) * 500 * sqrt(n / 50) / n / (sum(net[[length(net)]]
+  [
     ,
     1
   ]) - 1)

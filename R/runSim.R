@@ -27,25 +27,56 @@
 #' ranking selection; any other string is interpreted as 'random' for
 #' random selection.
 #'
-#' \code{truncSire} and \code{truncDam} truncate the male and female
-#' populations, respectively, such that only the top proportion of
-#' each sex being available for selection, with the proportions being
-#' given by these arguments.
+#' Linear ranking selection mimics natural selection: if the
+#' individuals in a population of size \eqn{n} are each given a rank
+#' \eqn{r} based on descending order of phenotypic value (i.e. the
+#' individual with the highest phenotypic value is given the rank
+#' \ifelse{html}{\out{<i>r</i><sub>1</sub> = 1}}{{\eqn{r_1 = 1}}{r_1 = 1}} while the individual with the lowest phenotypic value
+#' is given the rank \ifelse{html}{\out{<i>r<sub>n</sub></i> = <i>n</i>}}{{\eqn{r_n = n}}{r_n = n}}), the probability of an individual
+#' \eqn{i} being selected for mating is given by:
 #'
-#' \code{roundsSire} and \code{roundsDam} specify the maximum number
-#' of generations for males and females to survive, respectively.
-#' This condition is violated in the case where an insufficient
-#' number of offspring are produced to replace the individuals who
-#' have nonetheless survived the maximum number of rounds: in this
-#' case, younger individuals will be preserved in order to meet the
-#' population size.
+#' \ifelse{html}{
+#' \out{
+#' <i>P</i>(<i>i</i> is selected) = 2(<i>n</i> - <i>r<sub>i</sub></i> + 1) / <i>n</i>(<i>n</i> + 1)
+#' }}{{
+#' \deqn{P(i \textrm{ is selected}) = \frac{2(n - r_i + 1)}{n(n + 1)}}
+#' }{
+#' P(i is selected) = 2(n - r_i + 1) / n(n + 1)
+#' }}
 #'
-#' \code{litterDist} is a vector giving the probabilities for each
+#' Selection occurs by the population first being split into male and female
+#' sub-populations. Next, if the round is outside any initial burn-in period,
+#' each sub-population is truncated to a proportion of its original size per
+#' the values of \code{truncSire} and \code{truncDam}, respectively.
+#'
+#' When linear ranking selection is used, females are exhaustively
+#' sampled, without replacement, for each mating pair using their linear
+#' ranking probabilities, as given above; males are sampled for each mating
+#' pair using their linear ranking probabilities but with replacement, where
+#' they are each only replaced a maximum number of times as specified by
+#' \code{breedSire}. Random selection occurs in the same manner, but all
+#' probabilities are uniform. During any initial \code{burnIn} period, random
+#' selection is enforced.
+#'
+#' Each mating pair produces a number of full-sibling offspring by sampling
+#' once from the litter-size probability mass function given by \code{litterDist}
+#' (with the default guaranteeing two full-sibling offspring per mating pair).
+#' The PMF is specified via a vector giving the probabilities for each
 #' litter size, starting with a litter size of 0. For example,
-#' \code{c(0.2, 0.0, 0.1, 0.4, 0.3)} gives a 20% chance to a litter
-#' size of 0, a 10% chance of litter size of 2, a 40% chance of a
-#' litter size of 3, a 30% chance of a litter size of 4 and a 0%
+#' \code{c(0.2, 0.0, 0.1, 0.4, 0.3)} gives a 20\% chance of a litter
+#' size of 0, a 10\% chance of litter size of 2, a 40\% chance of a
+#' litter size of 3, a 30\% chance of a litter size of 4 and a 0\%
 #' chance of a litter size of 1 or greater than 4.
+#'
+#' Half-siblings occur when sires can mate more than once per round (as given by
+#' \code{breedSire}) or when sires or dams survive beyond one round (as given by
+#' \code{roundsSire} and \code{roundsDam}, respectively). It is important to note
+#' that \code{roundsSire} and \code{roundsDam}, which specify the maximum number
+#' of generations for males and females to survive, respectively, will be ignored
+#' in the case where an insufficient number of offspring are produced to replace
+#' the individuals who have nonetheless survived the maximum number of rounds: in
+#' this case, younger individuals will be preserved in order to meet the
+#' population size.
 #'
 #' \code{recombination} is a vector of recombination rates between
 #' SNPs. The length of this vector should be equal to the number of
@@ -54,10 +85,9 @@
 #' \code{map}.
 #'
 #' \code{allGenoFileName} is the name of a file in which the
-#' genotype for every individual will be stored. The output
-#' is serialised and can be read using *loadGeno()*.
-#'
-#' If the \code{allGenoFileName} argument is not given, no genotypes
+#' phased genotype for every individual will be stored. The output
+#' is serialised and can be read using \code{loadGeno}. If the
+#' \code{allGenoFileName} argument is not given, no genotypes
 #' will be written to file.
 #'
 #' @param pop a valid \code{Population} object with all necessary
@@ -66,11 +96,11 @@
 #'   to follow for selection
 #' @param generations an optional integer giving the number of
 #'   generations to iterate through in the simulation
-#' @param selection an optional string specifying linear ranking or
-#'   random selection
+#' @param selection an optional string specifying random (the default) or
+#'   linear ranking selection
 #' @param burnIn an optional integer giving the initial number of
-#'   generations in which to use random selection when linear ranking
-#'   selection is employed
+#'   generations in which to use random selection without truncation,
+#'   even when linear ranking selection or truncation is otherwise employed
 #' @param truncSire an optional value giving the proportion of the
 #'   males in the population with the highest phenotypic value to
 #'   select within
@@ -90,7 +120,7 @@
 #' @param recombination an optional vector giving the probabilities
 #'   for recombination events between each SNP
 #' @param allGenoFileName a string giving a file name,
-#'   indicating that all genotypes will be outputted during the run
+#'   indicating that all genotypes will be outputted to the file during the run
 #'
 #' @return A new \code{Population} object is returned.
 #'
@@ -122,8 +152,8 @@
 #' plot(pop)
 #' @seealso \code{\link{Population}}, \code{\link{addEffects}},
 #' \code{\link{attachEpiNet}}, \code{\link{print.Population}},
-#' \code{\link{plot.Population}}
-runSim <- function(pop, pedigree = NULL, generations = 2, selection = "ranking",
+#' \code{\link{plot.Population}}, \code{\link{loadGeno}}
+runSim <- function(pop, pedigree = NULL, generations = 2, selection = "random",
                    burnIn = 0, truncSire = 1, truncDam = 1, roundsSire = 1, roundsDam = 1,
                    litterDist = c(0, 0, 1), breedSire = 10, mutation = 10^-9, recombination = NULL,
                    allGenoFileName = NULL) {
@@ -219,21 +249,7 @@ runSim <- function(pop, pedigree = NULL, generations = 2, selection = "ranking",
     pop$af[1, ] <- calcAF(pop$hap)
   }
 
-  pop$allGenolotypes <- (!is.null(allGenoFileName) && is.character(allGenoFileName))
-
-  # if (!is.null(allGenoFileName) && is.character(allGenoFileName)) {
-  #   answer <- utils::askYesNo("Are you sure you wish to output all genotypes?")
-  #
-  #   if (is.na(answer))
-  #     stop("Cancelled action")
-  #
-  #   pop$allGenolotypes <- answer
-  #
-  #   if (answer)
-  #     pop$hapout <- allGenoFileName
-  # } else {
-  #   pop$allGenolotypes <- FALSE
-  # }
+  pop$allGenotypes <- (!is.null(allGenoFileName) && is.character(allGenoFileName))
 
   # Validate mutation rate
   if (length(mutation) != 1 || !is.numeric(mutation) || mutation < 0 ||
@@ -255,10 +271,9 @@ runSim <- function(pop, pedigree = NULL, generations = 2, selection = "ranking",
   pop$summaryData[1, ] <- summary(pop$phenotype)
 
   # Output sire and dam haplotypes to file
-  if (pop$allGenolotypes) {
+  if (pop$allGenotypes) {
     serialMat(hap2geno(pop$hap), allGenoFileName, append = FALSE)
   }
-  # MASS::write.matrix(hap2geno(pop$hap), getFilename(pop, 1))
 
   # Print relevant statistics
   cat("\nCompleted generation 1\n")
@@ -293,11 +308,19 @@ runSim <- function(pop, pedigree = NULL, generations = 2, selection = "ranking",
 
       # Select the sires and dams according to selection criteria
 
+      # Do not use truncation during burn-in period
+      truncm <- pop$truncMale
+      truncf <- pop$truncFemale
+      if (i <= pop$burnIn) {
+        truncm <- 1
+        truncf <- 1
+      }
+
       # How many males should we select from?
-      numMales <- round(sum(pop$isMale) * pop$truncMale)
+      numMales <- round(sum(pop$isMale) * truncm)
 
       # How many females should we select from?
-      numFemales <- round(sum(!pop$isMale) * pop$truncFemale)
+      numFemales <- round(sum(!pop$isMale) * truncf)
 
       if (numFemales < 2) {
         i <- i - 1
@@ -373,7 +396,8 @@ runSim <- function(pop, pedigree = NULL, generations = 2, selection = "ranking",
       offped <- data.frame(
         ID = zeroes, Sire = zeroes, Dam = zeroes,
         Additive = zeroes, Epistatic = zeroes, Environmental = zeroes,
-        Phenotype = zeroes, Round = zeroes + i
+        Phenotype = zeroes, Sex = sample(c("M", "F"), length(males), replace = TRUE), Round = zeroes + i,
+        stringsAsFactors = FALSE
       )
     }
 
@@ -411,7 +435,7 @@ runSim <- function(pop, pedigree = NULL, generations = 2, selection = "ranking",
     }
 
     # Output sire and dam haplotypes
-    if (pop$allGenolotypes) {
+    if (pop$allGenotypes) {
       serialMat(hap2geno(list(offspring[[1]], offspring[[2]])), allGenoFileName, append = TRUE)
     }
 
@@ -426,20 +450,23 @@ runSim <- function(pop, pedigree = NULL, generations = 2, selection = "ranking",
     if (pedDropper) {
       pop$ped[index1:index2, 4:7] <- pheno
       pop$ID <- c(pop$ID, pop$ped[index1:index2, 1])
+      pop$isMale <- c(pop$isMale, (pop$ped$Sex[index1:index2] == "M"))
 
       # Update population size
       pop$popSize <- length(pop$ID)
     } else {
       offped[, 4:7] <- pheno
       pop$ID <- c(pop$ID, offped$ID)
+      sexOffspring <- (offped$Sex == "M")
+      pop$isMale <- c(pop$isMale, sexOffspring)
     }
 
     # Append phenotype to population
     pop$phenotype <- c(pop$phenotype, pheno[, 4])
 
     # Append sex to population
-    sexOffspring <- sample(c(TRUE, FALSE), length(males), replace = TRUE)
-    pop$isMale <- c(pop$isMale, sexOffspring)
+    # sexOffspring <- sample(c(TRUE, FALSE), length(males), replace = TRUE)
+    # pop$isMale <- c(pop$isMale, sexOffspring)
 
     if (!pedDropper) {
       # Append rounds to survive
@@ -456,7 +483,7 @@ runSim <- function(pop, pedigree = NULL, generations = 2, selection = "ranking",
         foo <- data.frame(
           ID = zeroes, Sire = zeroes, Dam = zeroes,
           Additive = zeroes, Environmental = zeroes, Epistatic = zeroes,
-          Phenotype = zeroes, Round = zeroes
+          Phenotype = zeroes, Sex = rep("X", ceiling(pop$expectedOffspring)), Round = zeroes
         )
         pop$ped <- rbind(pop$ped, foo)
       }
@@ -473,12 +500,6 @@ runSim <- function(pop, pedigree = NULL, generations = 2, selection = "ranking",
       # If there aren't enough offspring to make up the difference,
       # we'll need to truncate the number culled
       if (length(cull) > length(males)) {
-        # if (i <= pop$burnIn || !pop$ranking) {
-        #   cull = cull[sample(length(cull), length(cull))]
-        # } else {
-        #   # Indices sorted by fitness
-        #   cull = cull[sort(pop$phenotype[oldIndex], index.return = T)$ix]
-        # }
         cull <- cull[sort(pop$roundsCount[oldIndex], index.return = TRUE)$ix]
         cull <- cull[1:length(males)]
       }

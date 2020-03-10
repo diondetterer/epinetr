@@ -12,7 +12,8 @@ attachEpiNet(pop, scaleFree = FALSE, k = 2, m = 1, additive = 0,
 be attached}
 
 \item{scaleFree}{an optional logical value indicating whether to construct
-a scale-free or random network}
+a network using the Barabasi-Albert model for generating scale-free
+networks}
 
 \item{k}{an optional vector listing orders of interaction to include}
 
