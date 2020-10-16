@@ -4,10 +4,22 @@
 \alias{runSim}
 \title{Run simulation on population.}
 \usage{
-runSim(pop, pedigree = NULL, generations = 2, selection = "random",
-  burnIn = 0, truncSire = 1, truncDam = 1, roundsSire = 1,
-  roundsDam = 1, litterDist = c(0, 0, 1), breedSire = 10,
-  mutation = 10^-9, recombination = NULL, allGenoFileName = NULL)
+runSim(
+  pop,
+  pedigree = NULL,
+  generations = 2,
+  selection = "random",
+  burnIn = 0,
+  truncSire = 1,
+  truncDam = 1,
+  roundsSire = 1,
+  roundsDam = 1,
+  litterDist = c(0, 0, 1),
+  breedSire = 10,
+  mutation = 10^-9,
+  recombination = NULL,
+  allGenoFileName = NULL
+)
 }
 \arguments{
 \item{pop}{a valid \code{Population} object with all necessary

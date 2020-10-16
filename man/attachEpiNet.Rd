@@ -4,8 +4,7 @@
 \alias{attachEpiNet}
 \title{Attach epistatic network to population.}
 \usage{
-attachEpiNet(pop, scaleFree = FALSE, k = 2, m = 1, additive = 0,
-  incmat = NULL)
+attachEpiNet(pop, scaleFree = FALSE, k = 2, m = 1, additive = 0, incmat = NULL)
 }
 \arguments{
 \item{pop}{the \code{Population} object to which the epistatic network will

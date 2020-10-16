@@ -327,7 +327,7 @@ pop <- attachEpiNet(pop, scaleFree = TRUE, additive = 7, m = 2)
 plot(getEpiNet(pop))
 ```
 
-There are two points to note with the *m* argument. The first point is that it has no impact on QTLs designated as additive-only. The second point is that a minimal connected graph is initially constructed prior to *m* being strictly applied. (This means that you may still see QTLs with only a single interaction.)
+There are three points to note with the *m* argument. The first point is that *m* specifically refers to the number of interactions and not the order of the interactions (which can be set with the *k* parameter; see below). The second point is that it has no impact on QTLs designated as additive-only. The third point is that a minimal connected graph is initially constructed prior to *m* being strictly applied. (This means that you may still see some QTLs with fewer than *m* interactions due to the value of *k*.)
 
 We can also include higher-order interactions using the *k* argument, which accepts a vector specifying the orders of interaction to include:
 
@@ -339,9 +339,11 @@ pop <- attachEpiNet(pop, scaleFree = TRUE, additive = 7, m = 2, k=2:7)
 plot(getEpiNet(pop))
 ```
 
-In cases where $m > 1$, any initial minimal connected graph is created by selecting $n$ nodes such that $n$ is the smallest integer satisfying the equation $\binom{n}{k - 1} \ge m$.
+In cases where $m > 1$, any initial minimal connected graph is created by selecting $n$ nodes such that $n$ is the smallest integer satisfying the equation $\binom{n - 1}{k - 1} \ge m$. (In the default case of pairwise interactions, this reduces to $n \ge m + 1$.)
 
 Where $k > 2$ we have extended the Barabasi-Albert model such that the *attachEpiNet* function adds interactions in order of increasing complexity: first, the function adds all 2-way interactions, then all 3-way interactions, *etcetera*. The important point to note is that, for networks generated using the Barabasi-Albert model, probabilities of connectedness are based on all previous interactions; for example, 3-way interactions are based on all previously established 2- and 3-way interactions. In this way, networks generated using the Barabasi-Albert model with multiple orders of interaction "layer up", such that the degrees from lower-order interactions contribute to the preferential attachment for higher-order interactions.
+
+All auto-generated networks are highly connected. More diffuse networks can, however, be manually generated, as detailed in the next section.
 
 ## Supplying a user-defined network
 
@@ -524,7 +526,7 @@ Finally, suppose that QTL `r qtls[3]` has the homozygous genotype coded 1|1. We 
 interaction1[2, 1, 3]
 ```
 
-Thus the contribution of this particular interaction to this individual's overall phenotype is `r interaction1[2, 1, 3]`.
+Thus the contribution of this particular interaction to this individual's overall phenotype is `r interaction1[2, 1, 3]`. (An offset, however, has yet to be applied: see the next section for details.)
 
 ## Inspecting additive, epistatic and environmental components
 
@@ -591,6 +593,12 @@ cov(components$Additive, components$Environmental)
 cov(components$Environmental, components$Epistatic)
 ```
 
+However:
+
+```{r}
+cor(components$Additive, components$Epistatic)
+```
+
 *epinetr* attempts to minimise these co-variances by selecting from within the random distributions for the environmental and epistatic components such that co-variances are minimal, given computational constraints. In particular, the epistatic component is optimised using a genetic algorithm.
 
 ## Deriving additive and epistatic components
@@ -601,7 +609,7 @@ We are now in a position to derive the additive component for the population. Fi
 geno <- getGeno(pop)
 ```
 
-Alternative, we could use the *getHaplo* function, which returns a list of the two haplotype matrices within the population; we would then need to sum the two haplotypes together.
+Alternatively, we could use the *getHaplo* function, which returns a list of the two haplotype matrices within the population; we would then need to sum the two haplotypes together.
 
 Next, we'll select only the QTLs within the genotypes:
 
@@ -628,7 +636,7 @@ The function *getEpistasis* returns a matrix:
 head(getEpistasis(pop))
 ```
 
-The rows in this matrix are the individuals; the columns are the contributions of each interaction to the overall epistatic component. By summing the rows and applying the epistatic offset to each value, we can derive the contribution of epistatis to each individual's phenotype:
+The rows in this matrix are the individuals; the columns are the contributions of each interaction to the overall epistatic component. By summing the rows and applying the epistatic offset to each value, we can derive the contribution of epistasis to each individual's phenotype:
 
 ```{r}
 epistatic <- rowSums(getEpistasis(pop)) + getEpiOffset(pop)
@@ -641,7 +649,34 @@ We can similarly compare this result with the epistatic component for the first 
 getComponents(pop)$Epistatic[1:5]
 ```
 
-We can thus easily derive both the additive and epistatic components for each individual.
+We can thus easily derive both the additive and epistatic components for each individual. This can be further replicated for individuals not in the population.
+
+Suppose you have a matrix of genotypes (`geno2`) for five individuals not in the population:
+
+```{r include=FALSE}
+geno2 = matrix(sample(0:2, 100*5, replace = TRUE, prob = c(0.25, 0.5, 0.25)), 5, 100)
+```
+
+```{r}
+geno2 <- geno2[, getQTL(pop)$Index]
+geno2
+```
+
+We can find their additive components using the following code:
+
+```{r}
+additive2 <- geno2 %*% getAddCoefs(pop) + getAddOffset(pop)
+additive2[1:5]
+```
+
+Similarly, we can find their epistatic components using the following code:
+
+```{r}
+epistatic2 <- rowSums(getEpistasis(pop, geno = geno2)) + getEpiOffset(pop)
+epistatic2
+```
+
+Note that this is achieved via the optional *geno* argument in the *getEpistasis* function.
 
 # Running the simulation
 
@@ -665,7 +700,9 @@ There are several optional arguments that can be supplied to the simulator to al
 * *recombination* is a vector of probabilities specifying the rate of recombination between consecutive SNPs in the *map* (obviously excepting consecutive SNPs on different chromosomes);
 * *allGenoFileName* is a string giving the file name to optionally output the genotypes from all generations.
 
-Linear ranking selection mimics natural selection: if the individuals in a population of size $n$ are each given a rank $r$ based on descending order of phenotypic value (i.e. the individual with the highest phenotypic value is given the rank $r_1 = 1$ while the individual with the lowest phenotypic value is given the rank $r_n = n$), the probability of an individual $i$ being selected for mating is given by:
+Each mating pair produces a number of full-sibling offspring by sampling once from the litter-size probability mass function given by *litterDist*. The vector can be of arbitrary length, such that in order to specify the possibility of up to $n$ full-sibling offspring per mating pair, a vector of length $n + 1$ must be supplied.
+
+Linear ranking selection is a form of weighted stochastic selection: if the individuals in a population of size $n$ are each given a rank $r$ based on descending order of phenotypic value (i.e. the individual with the highest phenotypic value is given the rank $r_1 = 1$ while the individual with the lowest phenotypic value is given the rank $r_n = n$), the probability of an individual $i$ being selected for mating is given by:
 
 \[P(i \textrm{ is selected}) = \frac{2(n - r_i + 1)}{n(n + 1)}\]
 
@@ -773,13 +810,27 @@ popRun2 <- getSubPop(popRun, ID)
 
 ## Using the pedigree dropper
 
-Finally, we can use a pedigree data frame to determine selection. This "pedigree dropper" first sorts the pedigree into the implicit number of generations; note that this may be different from the number of iterations of the simulator that produced the pedigree.
+Finally, we can use a pedigree data frame to determine selection, with the data frame giving IDs for each individual as well as its sire and dam IDs. Such a data frame can be retrieved from a previous simulation run using the *getPedigree* function on the resulting population, or we can instead use a new data frame like so:
 
-For example:
+```{r include=FALSE}
+pedData <- getPedigree(popRun)
+pedData <- pedData[,1:3]
+```
+
+```{r}
+pedData[201:210, ]
+```
+
+To use this "pedigree dropper", we call *runSim* with the *pedigree* argument:
 
 ```{r results="hide"}
-popRunPed <- runSim(pop, getPedigree(popRun))
+popRunPed <- runSim(pop, pedigree = pedData)
 ```
+
+The pedigree dropper first sorts the pedigree into the implicit number of generations, then runs the simulation using selection according to the given data frame. (Note that if you're using pedigree data from a previous run, the number of generations reported by the pedigree dropper may be different from the number of iterations of the simulator that produced the pedigree.)
+
+As usual, we can plot the resulting run:
+
 ```{r fig.width=7, fig.height=4, fig.align='center', fig.cap="A graphical representation of a simulation run using a pedigree data frame."}
 plot(popRunPed)
 ```

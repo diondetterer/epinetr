@@ -4,9 +4,11 @@
 \name{geno100snp}
 \alias{geno100snp}
 \title{Example genotype matrix.}
-\format{\code{geno100snp} is a matrix with 500 rows and 200
+\format{
+\code{geno100snp} is a matrix with 500 rows and 200
 columns, used in examples when constructing a population from
-genotypes using 500 individuals and 100 SNPs.}
+genotypes using 500 individuals and 100 SNPs.
+}
 \usage{
 geno100snp
 }

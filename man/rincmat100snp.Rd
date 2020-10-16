@@ -4,9 +4,11 @@
 \name{rincmat100snp}
 \alias{rincmat100snp}
 \title{Example incidence matrix.}
-\format{\code{rincmat100snp} is a matrix with 20 rows and 19
+\format{
+\code{rincmat100snp} is a matrix with 20 rows and 19
 columns, used in examples when constructing an epistatic network
-using a user-supplied incidence matrix.}
+using a user-supplied incidence matrix.
+}
 \usage{
 rincmat100snp
 }

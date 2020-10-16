@@ -4,10 +4,19 @@
 \alias{Population}
 \title{Population constructor.}
 \usage{
-Population(pop = NULL, popSize = NULL, vcf = NULL, map = NULL,
-  QTL = NULL, genotypes = NULL, literal = TRUE,
-  alleleFrequencies = NULL, broadH2 = NULL, narrowh2 = NULL,
-  traitVar = NULL)
+Population(
+  pop = NULL,
+  popSize = NULL,
+  vcf = NULL,
+  map = NULL,
+  QTL = NULL,
+  genotypes = NULL,
+  literal = TRUE,
+  alleleFrequencies = NULL,
+  broadH2 = NULL,
+  narrowh2 = NULL,
+  traitVar = NULL
+)
 }
 \arguments{
 \item{pop}{an optional \code{Population} object to use for default

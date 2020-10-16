@@ -9,7 +9,7 @@ getInteraction(pop, n)
 \arguments{
 \item{pop}{a valid population object}
 
-\item{n}{the interation to return}
+\item{n}{the interaction to return}
 }
 \description{
 Retrieve  values for an interaction within an epistatic network.
@@ -24,7 +24,8 @@ consisting of \eqn{3^5 = 243} entries.
 Within each dimension, the three indices (1, 2 and 3) correspond
 to the homozygous genotype coded 0/0, the heterozygous genotype
 and the homozygous genotype coded 1/1, respectively. Each entry
-is drawn from a normal distribution.
+is drawn from a normal distribution. (Any offset needs to be
+applied manually using \code{getEpiOffset}.)
 }
 \examples{
 # Construct a new population
@@ -56,7 +57,7 @@ getInteraction(pop, 4)[2, 1]
 getInteraction(pop, 2)[1, 3]
 }
 \seealso{
-\code{\link{attachEpiNet}}
+\code{\link{attachEpiNet}}, \code{\link{getEpiOffset}}
 }
 \author{
 Dion Detterer, Paul Kwan, Cedric Gondro

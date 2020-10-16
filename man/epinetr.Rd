@@ -3,7 +3,6 @@
 \docType{package}
 \name{epinetr}
 \alias{epinetr}
-\alias{epinetr-package}
 \title{epinetr}
 \description{
 epinetr is a package intended to aid in the investigation of the
