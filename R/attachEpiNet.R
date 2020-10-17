@@ -58,6 +58,7 @@
 #' @export
 #'
 #' @examples
+#' \donttest{
 #' # Generate a population and attach additive effects
 #' pop <- Population(
 #'   popSize = 200, map = map100snp, QTL = 20,
@@ -65,30 +66,31 @@
 #'   broadH2 = 0.9, narrowh2 = 0.6, traitVar = 40
 #' )
 #' pop <- addEffects(pop)
-#' 
+#'
 #' # Attach a random epistatic network with two- to four-way
 #' # interactions between QTLs
 #' popRnd <- attachEpiNet(pop, k = 2:4)
-#' 
+#'
 #' # Plot random network
 #' plot(getEpiNet(popRnd))
-#' 
+#'
 #' # Attach a scale-free epistatic network with two-way interactions
 #' # between QTLs and a minimum of three interactions per QTL
 #' popSF <- attachEpiNet(pop, scaleFree = TRUE, m = 3)
-#' 
+#'
 #' # Plot scale-free network
 #' plot(getEpiNet(popSF))
-#' 
+#'
 #' # Attach user-defined epistatic network
 #' popUser <- attachEpiNet(pop, incmat = rincmat100snp)
-#' 
+#'
 #' # Plot user-defined network
 #' plot(getEpiNet(popUser))
-#' 
+#'
 #' # Attach a random epistatic network with two- to ten-way
 #' # interactions between QTLs and decaying variance
 #' popDecay <- attachEpiNet(pop, k = 2:10)
+#' }
 #' @seealso \code{\link{Population}}, \code{\link{getEpiNet}},
 #' \code{\link{plot.EpiNet}}, \code{\link{addEffects}}
 attachEpiNet <- function(pop, scaleFree = FALSE, k = 2, m = 1, additive = 0,

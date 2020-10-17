@@ -129,27 +129,29 @@
 #' @export
 #'
 #' @examples
+#' \donttest{
 #' # Create population
 #' pop <- Population(
 #'   popSize = 200, map = map100snp, QTL = 20,
 #'   alleleFrequencies = runif(100),
 #'   broadH2 = 0.9, narrowh2 = 0.6, traitVar = 40
 #' )
-#' 
+#'
 #' # Attach additive effects using a normal distribution
 #' pop <- addEffects(pop)
-#' 
+#'
 #' # Attach epistatic effects
 #' pop <- attachEpiNet(pop)
-#' 
+#'
 #' # Run simulation for 150 generations
 #' pop <- runSim(pop, generations = 150)
-#' 
+#'
 #' # Display results
 #' pop
-#' 
+#'
 #' # Plot results
 #' plot(pop)
+#' }
 #' @seealso \code{\link{Population}}, \code{\link{addEffects}},
 #' \code{\link{attachEpiNet}}, \code{\link{print.Population}},
 #' \code{\link{plot.Population}}, \code{\link{loadGeno}}

@@ -163,6 +163,7 @@ is serialised and can be read using \code{loadGeno}. If the
 will be written to file.
 }
 \examples{
+\donttest{
 # Create population
 pop <- Population(
   popSize = 200, map = map100snp, QTL = 20,
@@ -184,6 +185,7 @@ pop
 
 # Plot results
 plot(pop)
+}
 }
 \seealso{
 \code{\link{Population}}, \code{\link{addEffects}},

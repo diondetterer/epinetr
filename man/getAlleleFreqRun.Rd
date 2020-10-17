@@ -22,6 +22,7 @@ Retrieves the allele frequencies in each generation across a
 simulation run.
 }
 \examples{
+\donttest{
 # Construct a population with additive and epistatic effects
 pop <- Population(
   popSize = 200, map = map100snp, QTL = 20,
@@ -35,6 +36,7 @@ pop <- attachEpiNet(pop)
 pop2 <- runSim(pop, generations = 150)
 
 af <- getAlleleFreqRun(pop2)
+}
 }
 \seealso{
 \code{\link{runSim}}

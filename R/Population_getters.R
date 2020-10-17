@@ -142,6 +142,7 @@ getQTL <- function(pop) {
 #' @export
 #'
 #' @examples
+#' \donttest{
 #' # Construct a population with additive and epistatic effects
 #' pop <- Population(
 #'   popSize = 200, map = map100snp, QTL = 20,
@@ -159,6 +160,7 @@ getQTL <- function(pop) {
 #'
 #' # Re-run the simulation using the same pedigree
 #' pop3 <- runSim(pop, ped)
+#' }
 #' @seealso \code{\link{runSim}}
 getPedigree <- function(pop) {
   testPop(pop)
@@ -183,6 +185,7 @@ getPedigree <- function(pop) {
 #' @export
 #'
 #' @examples
+#' \donttest{
 #' # Construct a population with additive and epistatic effects
 #' pop <- Population(
 #'   popSize = 200, map = map100snp, QTL = 20,
@@ -196,6 +199,7 @@ getPedigree <- function(pop) {
 #' pop2 <- runSim(pop, generations = 150)
 #'
 #' af <- getAlleleFreqRun(pop2)
+#' }
 #' @seealso \code{\link{runSim}}
 getAlleleFreqRun <- function(pop) {
   testPop(pop)
@@ -628,6 +632,7 @@ getEpiOffset <- function(pop) {
 #' @export
 #'
 #' @examples
+#' \donttest{
 #' # Construct a population with additive and epistatic effects
 #' pop <- Population(
 #'   popSize = 2000, map = map100snp, QTL = 20,
@@ -643,6 +648,7 @@ getEpiOffset <- function(pop) {
 #' ID <- getComponents(pop2)$ID
 #' ID <- sample(ID, 500)
 #' pop3 <- getSubPop(pop2, ID)
+#' }
 #' @seealso \code{\link{Population}}, \code{\link{getComponents}}
 getSubPop <- function(pop, ID) {
   pop2 <- list()

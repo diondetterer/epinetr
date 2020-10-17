@@ -29,6 +29,7 @@ Any additive and epistatic effects will be copied as-is to the new
 Any IDs given but not present will be discarded.
 }
 \examples{
+\donttest{
 # Construct a population with additive and epistatic effects
 pop <- Population(
   popSize = 2000, map = map100snp, QTL = 20,
@@ -44,6 +45,7 @@ pop2 <- runSim(pop, generations = 10)
 ID <- getComponents(pop2)$ID
 ID <- sample(ID, 500)
 pop3 <- getSubPop(pop2, ID)
+}
 }
 \seealso{
 \code{\link{Population}}, \code{\link{getComponents}}

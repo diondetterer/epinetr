@@ -69,6 +69,7 @@ homozygous genotypes), and these values are summed according to the value
 of the genotype.
 }
 \examples{
+\donttest{
 # Generate a population and attach additive effects
 pop <- Population(
   popSize = 200, map = map100snp, QTL = 20,
@@ -100,6 +101,7 @@ plot(getEpiNet(popUser))
 # Attach a random epistatic network with two- to ten-way
 # interactions between QTLs and decaying variance
 popDecay <- attachEpiNet(pop, k = 2:10)
+}
 }
 \references{
 Barabasi AL, Albert R, 'Emergence of scaling in random networks,'

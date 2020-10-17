@@ -23,6 +23,7 @@ population, including the phenotypic components of all individuals
 in the pedigree.
 }
 \examples{
+\donttest{
 # Construct a population with additive and epistatic effects
 pop <- Population(
   popSize = 200, map = map100snp, QTL = 20,
@@ -40,6 +41,7 @@ ped <- getPedigree(pop2)
 
 # Re-run the simulation using the same pedigree
 pop3 <- runSim(pop, ped)
+}
 }
 \seealso{
 \code{\link{runSim}}

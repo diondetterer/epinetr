@@ -293,7 +293,7 @@ epinet <- getEpiNet(pop)
 plot(epinet)
 ```
 
-We can use the *scaleFree* flag to generate a network using the Barabasi-Albert model^[[Barabasi AL, Albert R, "Emergence of scaling in random networks," _Science_ 286(5439): 509-12, 15 October 1999.](http://barabasi.com/f/67.pdf)].
+We can use the *scaleFree* flag to generate a network using the Barabasi-Albert model^[[Barabasi AL, Albert R, "Emergence of scaling in random networks," _Science_ 286(5439): 509-12, 15 October 1999.](https://barabasi.com/f/67.pdf)].
 
 ```{r results=FALSE}
 pop <- attachEpiNet(pop, scaleFree = TRUE)
