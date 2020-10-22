@@ -122,38 +122,46 @@ rn <- function(degree, m = 1, k = 2, additive = 0, scaleFree = FALSE) {
       combinations <- nodes[1]
     } else {
       # Find all the ways the new node can connect to the previous nodes.
-      combinations <- combn(nodes[1:(i - 1)], k - 1)
-
-      # Get probabilities from degrees if scale-free
-      pp <- apply(combinations, 2, function(x) sum(degree[x]))
-      if (sum(pp) > 0 && scaleFree) {
-        pp <- pp / sum(pp)
+      if (m == 1) {
+        combinations <- sample(nodes[1:(i - 1)], k - 1)
       } else {
-        pp <- rep(1 / length(pp), length(pp))
-      }
+        combinations <- combn(nodes[1:(i - 1)], k - 1)
 
-      # Sample from the different ways of connecting to the previous nodes
-      combinations <- combinations[, sample(ncol(combinations), m,
-        prob = pp
-      )]
+        # Get probabilities from degrees if scale-free
+        pp <- apply(combinations, 2, function(x) sum(degree[x]))
+        if (sum(pp) > 0 && scaleFree) {
+          pp <- pp / sum(pp)
+
+          # Sample from the different ways of connecting to the previous nodes
+          combinations <- combinations[, sample(ncol(combinations), m,
+                                                prob = pp
+          )]
+        } else {
+          combinations <- combinations[, sample(ncol(combinations), m)]
+        }
+      }
     }
 
     for (j in 1:m) {
       # Add the new node
       incmat[nodes[i], column] <- 1
-      degree[nodes[i]] <- degree[nodes[i]] + 1
+      if (!scaleFree)
+        degree[nodes[i]] <- degree[nodes[i]] + 1
 
       # Connect it to the previous nodes
       if (is.null(dim(combinations)) && m == 1) {
         incmat[combinations, column] <- 1
-        degree[combinations] <- degree[combinations] + 1
+        if (!scaleFree)
+          degree[combinations] <- degree[combinations] + 1
       } else if (is.null(dim(combinations)) && k == 2) {
         incmat[combinations[j], column] <- 1
-        degree[combinations[j]] <- degree[combinations[j]] + 1
+        if (!scaleFree)
+          degree[combinations[j]] <- degree[combinations[j]] + 1
       } else {
         incmat[combinations[, j], column] <- 1
-        degree[combinations[, j]] <- degree[combinations[, j]] +
-          1
+        if (!scaleFree)
+          degree[combinations[, j]] <- degree[combinations[, j]] +
+            1
       }
       column <- column + 1
     }
