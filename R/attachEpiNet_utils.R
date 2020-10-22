@@ -125,7 +125,7 @@ rn <- function(degree, m = 1, k = 2, additive = 0, scaleFree = FALSE) {
       if (m == 1) {
         combinations <- sample(nodes[1:(i - 1)], k - 1)
       } else {
-        combinations <- combn(nodes[1:(i - 1)], k - 1)
+        combinations <- t(RcppAlgos::comboGeneral(nodes[1:(i - 1)], k - 1))
 
         # Get probabilities from degrees if scale-free
         pp <- apply(combinations, 2, function(x) sum(degree[x]))

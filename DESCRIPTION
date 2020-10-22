@@ -1,6 +1,6 @@
 Package: epinetr
 Title: Epistatic Network Modelling with Forward-Time Simulation
-Version: 0.91
+Version: 0.912
 Authors@R: c(
   person("Dion", "Detterer", email = "ddettere@myune.edu.au", role = c("aut", "cre")),
   person("Paul", "Kwan", email = "pkwan@mit.edu.au", role = "aut"),
@@ -19,6 +19,7 @@ Imports:
     igraph (>= 1.2.4),
     methods (>= 2.10),
     Rcpp (>= 0.12.18),
+    RcppAlgos (>= 2.4.1),
     reshape2 (>= 1.4.3),
     vcfR (>= 1.8.0)
 RoxygenNote: 7.1.1
