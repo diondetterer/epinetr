@@ -1,6 +1,6 @@
 Package: epinetr
 Title: Epistatic Network Modelling with Forward-Time Simulation
-Version: 0.912
+Version: 0.92
 Authors@R: c(
   person("Dion", "Detterer", email = "ddettere@myune.edu.au", role = c("aut", "cre")),
   person("Paul", "Kwan", email = "pkwan@mit.edu.au", role = "aut"),

@@ -336,14 +336,13 @@ runSim <- function(pop, pedigree = NULL, generations = 2, selection = "random",
         break
       }
 
+      # Get the indices of the top males and females
+      sorted <- sort(pop$phenotype, decreasing = TRUE, index.return = TRUE)$ix
+      males <- sorted[pop$isMale[sorted]][1:numMales]
+      females <- sorted[!pop$isMale[sorted]][1:numFemales]
+
       # Select based on phenotype ranking
       if (pop$ranking & (i > pop$burnIn)) {
-
-        # Get the indices of the top males and females
-        sorted <- sort(pop$phenotype, decreasing = TRUE, index.return = TRUE)$ix
-        males <- sorted[pop$isMale[sorted]][1:numMales]
-        females <- sorted[!pop$isMale[sorted]][1:numFemales]
-
         # Select sires for each pair within breeding count restriction
         males <- getMales(males, numFemales, rep(
           pop$sireBreed,
@@ -359,7 +358,7 @@ runSim <- function(pop, pedigree = NULL, generations = 2, selection = "random",
         # Select randomly
       } else {
         # Randomly select within male population
-        males <- sample(which(pop$isMale), numMales, replace = FALSE)
+        # males <- sample(which(pop$isMale), numMales, replace = FALSE)
 
         # Select sires for each pair within breeding count restriction
         males <- getMales(males, numFemales, rep(
