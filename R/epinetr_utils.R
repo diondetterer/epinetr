@@ -89,25 +89,25 @@ geno2hap <- function(geno) {
 
 
 # Save the state of the random number generator
-saveRNG <- function() {
-  if (exists(".Random.seed", .GlobalEnv)) {
-    oldseed <- .GlobalEnv$.Random.seed
-  } else {
-    oldseed <- NULL
-  }
-
-  return(oldseed)
-}
+# saveRNG <- function() {
+#   if (exists(".Random.seed", .GlobalEnv)) {
+#     oldseed <- .GlobalEnv$.Random.seed
+#   } else {
+#     oldseed <- NULL
+#   }
+#
+#   return(oldseed)
+# }
 
 
 # Restore the state of the random number generator
-restoreRNG <- function(oldseed) {
-  if (!is.null(oldseed)) {
-    .GlobalEnv$.Random.seed <- oldseed
-  } else {
-    rm(".Random.seed", envir = .GlobalEnv)
-  }
-}
+# restoreRNG <- function(oldseed) {
+#   if (!is.null(oldseed)) {
+#     .GlobalEnv$.Random.seed <- oldseed
+#   } else {
+#     rm(".Random.seed", envir = .GlobalEnv)
+#   }
+# }
 
 
 # Get the epistasis for each individual
@@ -203,7 +203,7 @@ fitRnd <- function(vec, fun, ..., tolerance = 0.005, iter.max = 1000) {
 #' # Load genotype file
 #' filename <- system.file("extdata", "geno.epi", package = "epinetr")
 #' geno <- loadGeno(filename)
-#' 
+#'
 #' # Use genotypes as basis for new population
 #' pop <- Population(
 #'   map = map100snp, QTL = 20, genotypes = geno,

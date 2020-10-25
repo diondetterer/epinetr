@@ -449,10 +449,11 @@ getInteraction <- function(pop, n) {
   testPop(pop)
 
   nqtl <- sum(pop$epiNet$Incidence[, n] > 0)
-  temp <- saveRNG()
-  set.seed(pop$epiNet$Seeds[n])
-  vals <- rnorm(3^nqtl) * pop$epiScale # + pop$epiOffset / ncol(pop$epiNet$Incidence)
-  restoreRNG(temp)
+  # temp <- saveRNG()
+  # set.seed(pop$epiNet$Seeds[n])
+  # vals <- rnorm(3^nqtl) * pop$epiScale # + pop$epiOffset / ncol(pop$epiNet$Incidence)
+  # restoreRNG(temp)
+  vals <- rng(3^nqtl, pop$epiNet$Seeds[n]) * pop$epiScale
   return(array(vals, dim = rep(3, nqtl)))
 }
 
@@ -510,17 +511,18 @@ getEpistasis <- function(pop, scale = TRUE, geno = NULL) {
   seeds <- pop$epiNet$Seeds
 
   # Save the RNG
-  oldseed <- saveRNG()
+  # oldseed <- saveRNG()
 
   # Get epistatic values per individual per interaction
   for (i in 1:ncol(indices)) {
-    set.seed(seeds[i])
-    rnvals <- rnorm(max(indices[, i]))
+    # set.seed(seeds[i])
+    # rnvals <- rnorm(max(indices[, i]))
+    rnvals <- rng(max(indices[, i]), seeds[i])
     indices[, i] <- rnvals[indices[, i]]
   }
 
   # Restore the RNG
-  restoreRNG(oldseed)
+  # restoreRNG(oldseed)
 
   if (!is.null(pop$epiScale) && scale) {
     indices <- indices * pop$epiScale

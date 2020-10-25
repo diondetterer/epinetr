@@ -5,6 +5,10 @@ recMask <- function(bvec) {
     .Call(`_epinetr_recMask`, bvec)
 }
 
+rng <- function(n, seed) {
+    .Call(`_epinetr_rng`, n, seed)
+}
+
 serialMat <- function(x, filename, append) {
     .Call(`_epinetr_serialMat`, x, filename, append)
 }

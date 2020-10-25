@@ -16,6 +16,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// rng
+NumericVector rng(int n, unsigned seed);
+RcppExport SEXP _epinetr_rng(SEXP nSEXP, SEXP seedSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< unsigned >::type seed(seedSEXP);
+    rcpp_result_gen = Rcpp::wrap(rng(n, seed));
+    return rcpp_result_gen;
+END_RCPP
+}
 // serialMat
 int serialMat(NumericMatrix x, StringVector filename, bool append);
 RcppExport SEXP _epinetr_serialMat(SEXP xSEXP, SEXP filenameSEXP, SEXP appendSEXP) {
@@ -43,6 +55,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_epinetr_recMask", (DL_FUNC) &_epinetr_recMask, 1},
+    {"_epinetr_rng", (DL_FUNC) &_epinetr_rng, 2},
     {"_epinetr_serialMat", (DL_FUNC) &_epinetr_serialMat, 3},
     {"_epinetr_getSerialMat", (DL_FUNC) &_epinetr_getSerialMat, 1},
     {NULL, NULL, 0}

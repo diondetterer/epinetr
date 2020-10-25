@@ -15,7 +15,6 @@
 #' @importFrom Rcpp sourceCpp
 #' @importFrom stats cov rnorm runif sd var
 #' @importFrom methods is
-#' @importFrom utils combn
 #' @useDynLib epinetr, .registration = TRUE
 #' @name epinetr
 NULL
