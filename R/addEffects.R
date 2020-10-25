@@ -27,13 +27,13 @@
 #'   alleleFrequencies = runif(100),
 #'   broadH2 = 0.9, narrowh2 = 0.6, traitVar = 40
 #' )
-#' 
+#'
 #' # Attach additive effects using a normal distribution
 #' pop <- addEffects(pop)
-#' 
+#'
 #' # Attach additive effects using a uniform distribution
 #' pop2 <- addEffects(pop, distrib = runif)
-#' 
+#'
 #' # Attach additive effects using a vector of coefficients
 #' effects <- c(
 #'   1.2, 1.5, -0.3, -1.4, 0.8,
@@ -42,13 +42,13 @@
 #'   0.4, -0.8, 0.0, -1.1, -1.3
 #' )
 #' pop3 <- addEffects(pop, effects = effects)
-#' 
+#'
 #' # Print first population
 #' pop
-#' 
+#'
 #' # Print second population
 #' pop2
-#' 
+#'
 #' # Print third population
 #' pop3
 #' @export
@@ -94,7 +94,7 @@ addEffects <- function(pop, effects = NULL, distrib = rnorm) {
   }
 
   if (is.null(pop$epiNet) && pop$H2 > pop$h2) {
-    cat("Run attachEpiNet() to attach epistatic effects to population.\n")
+    message("Run attachEpiNet() to attach epistatic effects to population.")
   }
 
   return(pop)

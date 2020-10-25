@@ -132,7 +132,7 @@ attachEpiNet <- function(pop, scaleFree = FALSE, k = 2, m = 1, additive = 0,
   }
 
   if (is.null(pop$additive) && pop$h2 > 0) {
-    cat("Run addEffects() to attach additive effects to population.\n")
+    message("Run addEffects() to attach additive effects to population.")
   }
 
   return(pop)

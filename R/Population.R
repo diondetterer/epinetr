@@ -100,27 +100,27 @@
 #' # frequencies and 20 QTLs chosen at random, broad-sense
 #' # heritability set to 0.9, narrow-sense heritability set to 0.75
 #' # and overall trait variance set to 40.
-#' 
+#'
 #' pop <- Population(
 #'   popSize = 500, map = map100snp, QTL = 20,
 #'   alleleFrequencies = runif(100), broadH2 = 0.9,
 #'   narrowh2 = 0.75, traitVar = 40
 #' )
-#' 
+#'
 #' # Construct a new population of size 500 using directly supplied
 #' # genotypes and 20 QTLs chosen at random, broad-sense heritability
 #' # set to 0.7, narrow-sense heritability set to 0.3 and overall
 #' # trait variance set to 10.
-#' 
+#'
 #' pop2 <- Population(
 #'   map = map100snp, genotypes = geno100snp,
 #'   literal = TRUE, QTL = 20,
 #'   broadH2 = 0.7, narrowh2 = 0.3, traitVar = 10
 #' )
-#' 
+#'
 #' # Modify the previous population to have narrow-sense heritabilty
 #' # set to 0.45 and overall trait variance set to 20.
-#' 
+#'
 #' pop2 <- Population(pop2, narrowh2 = 0.45, traitVar = 20)
 #' @seealso \code{\link{addEffects}}, \code{\link{attachEpiNet}},
 #' \code{\link{print.Population}}
@@ -195,9 +195,9 @@ Population <- function(pop = NULL, popSize = NULL, vcf = NULL, map = NULL, QTL =
   }
 
   if (is.null(pop2$additive) && pop2$h2 > 0) {
-    cat("Run addEffects() to attach additive effects to population.\n")
+    message("Run addEffects() to attach additive effects to population.")
   } else if (is.null(pop2$epiNet) && pop2$H2 > pop2$h2) {
-    cat("Run attachEpiNet() to attach epistatic effects to population.\n")
+    message("Run attachEpiNet() to attach epistatic effects to population.")
   }
 
   return(pop2)

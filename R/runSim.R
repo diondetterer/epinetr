@@ -175,18 +175,18 @@ runSim <- function(pop, pedigree = NULL, generations = 2, selection = "random",
   if (!is.null(pedigree)) {
     pedDropper <- TRUE
 
-    cat("\nValidating pedigree data... ")
+    message("Validating pedigree data...")
     pedigree <- prepPed(pedigree)
-    cat("Done.\n")
+    # message("Done.\n")
 
     # Sort the pedigree
-    cat("\nSorting pedigree data into generations...\n")
+    message("Sorting pedigree data into generations...")
     foo <- sortPed(pedigree)
     pedigree <- pedigree[foo$sort, ]
 
     # Get number of matings per generation
     matings <- foo$matings
-    cat("Found", length(matings), "generations.\n")
+    message(paste("Found", length(matings), "generations."))
 
     # Ensure that all first-generation pedigree IDs are present in the
     # population
@@ -278,9 +278,9 @@ runSim <- function(pop, pedigree = NULL, generations = 2, selection = "random",
   }
 
   # Print relevant statistics
-  cat("\nCompleted generation 1\n")
-  cat("Mean phenotypic value:", mean(pop$phenotype), "\n")
-  cat("Maximum phenotypic value:", max(pop$phenotype), "\n\n")
+  message("Completed generation 1")
+  message(paste("Mean phenotypic value:", mean(pop$phenotype)))
+  message(paste("Maximum phenotypic value:", max(pop$phenotype), "\n"))
 
   # Generation loop
   for (i in 2:pop$numGen) {
@@ -326,13 +326,13 @@ runSim <- function(pop, pedigree = NULL, generations = 2, selection = "random",
 
       if (numFemales < 2) {
         i <- i - 1
-        cat("Exhausted female population\n")
+        warning("Exhausted female population")
         break
       }
 
       if (numMales == 0) {
         i <- i - 1
-        cat("Exhausted male population\n")
+        warning("Exhausted male population")
         break
       }
 
@@ -541,9 +541,9 @@ runSim <- function(pop, pedigree = NULL, generations = 2, selection = "random",
     pop$summaryData[i, ] <- summary(pop$phenotype)
 
     # Print relevant statistics
-    cat("Completed generation", i, "\n")
-    cat("Mean phenotypic value:", mean(pop$phenotype), "\n")
-    cat("Maximum phenotypic value:", max(pop$phenotype), "\n\n")
+    message(paste("Completed generation", i))
+    message(paste("Mean phenotypic value:", mean(pop$phenotype)))
+    message(paste("Maximum phenotypic value:", max(pop$phenotype), "\n"))
   }
 
   # Trim pedigree data
