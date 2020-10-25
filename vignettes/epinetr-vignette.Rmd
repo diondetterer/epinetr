@@ -29,7 +29,7 @@ In Section 1, we look at the various ways of constructing a population in *epine
 
 As a preview, here's an example workflow:
 
-```{r, results='hide'}
+```{r message=FALSE, fig.width=5, fig.asp=1, fig.align='center', fig.cap="An epistatic network generated between 50 QTLs."}
 library(epinetr)
 
 # Build a population of size 1000, with 50 QTLs, broad-sense heritability of 0.6,
@@ -42,9 +42,7 @@ pop <- addEffects(pop)
 
 # Attach an epistatic network
 pop <- attachEpiNet(pop)
-```
 
-```{r fig.width=5, fig.asp=1, fig.align='center', fig.cap="An epistatic network generated between 50 QTLs."}
 # Plot the network
 plot(getEpiNet(pop))
 ```
@@ -54,12 +52,10 @@ plot(getEpiNet(pop))
 head(getComponents(pop))
 ```
 
-```{r results="hide"}
+```{r message=FALSE, fig.width=7, fig.height=4, fig.align='center', fig.cap="A graphical representation of a simulation run across 250 generations."}
 # Run a simulation across 250 generations
 pop <- runSim(pop, generations = 250, selection = "ranking")
-```
 
-```{r fig.width=7, fig.height=4, fig.align='center', fig.cap="A graphical representation of a simulation run across 250 generations."}
 # Plot the simulation run
 plot(pop)
 ```
@@ -101,40 +97,26 @@ There are 100 SNPs across 22 chromosomes in this map data frame.
 
 Given this map, we can now construct a population. We'll generate 200 individuals using allele frequencies selected from a uniform distribution, we'll select 20 QTLs at random and we'll give the phenotypic trait under examination a variance of 40, a broad-sense heritability of 0.9 and a narrow-sense heritability of 0.6.
 
-```{r results=FALSE}
+```{r message=FALSE}
 pop <- Population(popSize = 200, map = map100snp, QTL = 20,
                   alleleFrequencies = runif(100),
                   broadH2 = 0.9, narrowh2 = 0.6, traitVar = 40)
 pop
 ```
-
-```{r echo=FALSE}
-pop
-```
-
 We can fall back on the built-in defaults for *broadH2*, *narrowh2* and *traitVar* of 0.5, 0.3 and 1, respectively:
 
-```{r results=FALSE}
+```{r message=FALSE}
 pop <- Population(popSize = 200, map = map100snp, QTL = 20,
                   alleleFrequencies = runif(100))
 pop
 ```
-
-```{r echo=FALSE}
-pop
-```
-
 We can also specify the QTLs by listing their SNP IDs:
 
-```{r results=FALSE}
+```{r message=FALSE}
 pop <- Population(popSize = 200, map = map100snp,
                   QTL = c(62, 55, 92, 74, 11, 38),
                   alleleFrequencies = runif(100),
                   broadH2 = 0.9, narrowh2 = 0.6, traitVar = 40)
-pop
-```
-
-```{r echo=FALSE}
 pop
 ```
 
@@ -168,7 +150,7 @@ That is, SNP 1 is heterozygous with genotype 1|0, SNPs 2-4 are homozygous with g
 
 We can supply a phased genotype matrix to the constructor like so:
 
-```{r results=FALSE}
+```{r message=FALSE}
 pop <- Population(popSize = nrow(geno100snp), map = map100snp, QTL = 20,
                   genotypes = geno100snp,
                   broadH2 = 0.9, narrowh2 = 0.6, traitVar = 40)
@@ -178,7 +160,7 @@ Supplying a phased genotype matrix allows us to directly specify the initial gen
 
 If we wish to use the genotypes to suggest allele frequencies while still maintaining the population size, we can set the *literal* flag to `FALSE`.
 
-```{r results=FALSE}
+```{r message=FALSE}
 pop <- Population(popSize = nrow(geno100snp), map = map100snp, QTL = 20,
                   genotypes = geno100snp, literal = FALSE,
                   broadH2 = 0.9, narrowh2 = 0.6, traitVar = 40)
@@ -188,64 +170,44 @@ pop <- Population(popSize = nrow(geno100snp), map = map100snp, QTL = 20,
 
 The *Population* constructor can also be used to modify an existing population. We can, for example, adjust the heritability:
 
-```{r results=FALSE}
+```{r message=FALSE}
 pop <- Population(pop, broadH2 = 0.7, traitVar = 30)
 pop
 ```
-
-```{r echo=FALSE}
-pop
-```
-
 We can also adjust the population size; this will necessarily generate a new set of genotypes based on the same allele frequencies:
 
-```{r results=FALSE}
+```{r message=FALSE}
 pop <- Population(pop, popSize = 800)
 pop
 ```
-
-```{r echo=FALSE}
-pop
-```
-
 Similarly, we can adjust the allele frequencies, which will necessarily also generate a new set of genotypes:
 
-```{r results=FALSE}
+```{r message=FALSE}
 pop <- Population(pop, alleleFrequencies = runif(100))
 pop
 ```
-
-```{r echo=FALSE}
-pop
-```
-
 Where possible, the population features are preserved while adjusting only the parameters specified.
 
 # Attaching effects to the population
 
 Because we have specified a non-zero narrow-sense heritability for our population, we now need to attach additive effects. This is done using the *addEffects* function.
 
-```{r results=FALSE}
+```{r message=FALSE}
 pop <- addEffects(pop)
 pop
 ```
-
-```{r echo=FALSE}
-pop
-```
-
 As expected, 60% of the phenotypic variance is attributable to additive effects.
 
 By default, effects are selected from a normal distribution; we can, however, supply a
 different distribution function.
 
-```{r results=FALSE}
+```{r message=FALSE}
 pop <- addEffects(pop, distrib = runif)
 ```
 
 Alternatively, we can supply our own additive effects for the QTLs.
 
-```{r results=FALSE}
+```{r message=FALSE}
 effects <- c( 1.2,  1.5, -0.3, -1.4,  0.8,
               2.4,  0.2, -0.8, -0.4,  0.8,
              -0.2, -1.4,  1.4,  0.2, -0.9,
@@ -253,33 +215,19 @@ effects <- c( 1.2,  1.5, -0.3, -1.4,  0.8,
 pop <- addEffects(pop, effects = effects)
 getAddCoefs(pop)
 ```
-
-```{r echo=FALSE}
-getAddCoefs(pop)
-```
-
 Note that the additive effects are scaled so as to guarantee the initial narrow-sense
 heritability. This is evident by adjusting the narrow-sense heritability within the population:
 
-```{r results=FALSE}
+```{r message=FALSE}
 pop <- Population(pop, narrowh2 = 0.4)
 getAddCoefs(pop)
 ```
-
-```{r echo=FALSE}
-getAddCoefs(pop)
-```
-
 ## Attaching an epistatic network to the population
 
 If broad-sense heritability is higher than narrow-sense heritability in the population, you will need to attach epistatic effects. The simplest way to do this is to use the *attachEpiNet* function with the default arguments, supplying only the population. This will generate a random epistatic network with the QTLs as nodes.
 
-```{r results=FALSE}
+```{r message=FALSE}
 pop <- attachEpiNet(pop)
-pop
-```
-
-```{r echo=FALSE}
 pop
 ```
 
@@ -295,11 +243,8 @@ plot(epinet)
 
 We can use the *scaleFree* flag to generate a network using the Barabasi-Albert model^[[Barabasi AL, Albert R, "Emergence of scaling in random networks," _Science_ 286(5439): 509-12, 15 October 1999.](https://barabasi.com/f/67.pdf)].
 
-```{r results=FALSE}
+```{r message=FALSE, fig.width=5, fig.asp=1, fig.align='center', fig.cap="An epistatic network generated using the Barabasi-Albert model between 20 QTLs."}
 pop <- attachEpiNet(pop, scaleFree = TRUE)
-```
-
-```{r fig.width=5, fig.asp=1, fig.align='center', fig.cap="An epistatic network generated using the Barabasi-Albert model between 20 QTLs."}
 plot(getEpiNet(pop))
 ```
 
@@ -309,36 +254,24 @@ The "random" network model in *epinetr* acts as a control case: it uses the same
 
 If we want a number of QTLs to only have additive effects applied, we can use the *additive* argument, giving the number of QTLs not to be included in the epistatic network.
 
-```{r, results='hide'}
+```{r message=FALSE, fig.width=5, fig.asp=1, fig.align='center', fig.cap="An epistatic network where 7 QTLs have no epistatic effects."}
 pop <- attachEpiNet(pop, scaleFree = TRUE, additive = 7)
-```
-
-```{r, fig.width=5, fig.asp=1, fig.align='center', fig.cap="An epistatic network where 7 QTLs have no epistatic effects."}
 plot(getEpiNet(pop))
 ```
-
 The minimum number of interactions per QTL can be given with the *m* argument.
 
-```{r, results='hide'}
+```{r message=FALSE, fig.width=5, fig.asp=1, fig.align='center', fig.cap="An epistatic network with a minimum of 2 interactions per epistatic QTL."}
 pop <- attachEpiNet(pop, scaleFree = TRUE, additive = 7, m = 2)
-```
-
-```{r, fig.width=5, fig.asp=1, fig.align='center', fig.cap="An epistatic network with a minimum of 2 interactions per epistatic QTL."}
 plot(getEpiNet(pop))
 ```
-
 There are three points to note with the *m* argument. The first point is that *m* specifically refers to the number of interactions and not the order of the interactions (which can be set with the *k* parameter; see below). The second point is that it has no impact on QTLs designated as additive-only. The third point is that a minimal connected graph is initially constructed prior to *m* being strictly applied. (This means that you may still see some QTLs with fewer than *m* interactions due to the value of *k*.)
 
 We can also include higher-order interactions using the *k* argument, which accepts a vector specifying the orders of interaction to include:
 
-```{r, results='hide'}
+```{r message=FALSE, fig.width=5, fig.asp=1, fig.align='center', fig.cap="An epistatic network featuring 2-way to 7-way interactions"}
 pop <- attachEpiNet(pop, scaleFree = TRUE, additive = 7, m = 2, k=2:7)
-```
-
-```{r, fig.width=5, fig.asp=1, fig.align='center', fig.cap="An epistatic network featuring 2-way to 7-way interactions"}
 plot(getEpiNet(pop))
 ```
-
 In cases where $m > 1$, any initial minimal connected graph is created by selecting $n$ nodes such that $n$ is the smallest integer satisfying the equation $\binom{n - 1}{k - 1} \ge m$. (In the default case of pairwise interactions, this reduces to $n \ge m + 1$.)
 
 Where $k > 2$ we have extended the Barabasi-Albert model such that the *attachEpiNet* function adds interactions in order of increasing complexity: first, the function adds all 2-way interactions, then all 3-way interactions, *etcetera*. The important point to note is that, for networks generated using the Barabasi-Albert model, probabilities of connectedness are based on all previous interactions; for example, 3-way interactions are based on all previously established 2- and 3-way interactions. In this way, networks generated using the Barabasi-Albert model with multiple orders of interaction "layer up", such that the degrees from lower-order interactions contribute to the preferential attachment for higher-order interactions.
@@ -364,10 +297,6 @@ inci <- which(inc[, 1:5] == 1)
 incs <- rowSums(inc[, 1:5])
 incm <- which(incs == max(incs))
 ```
-
-```{r, echo=FALSE}
-```
-
 Here we can see that the first interaction is between QTL `r inci[1]` and QTL `r inci[2]`, and that QTL `r incm[1]` is included in `r max(incs)` of the first 5 interactions.
 
 We can define our own network in the same way. `rincmat100snp` is an example of a user-defined incidence matrix, giving 19 interactions across 20 QTLs:
@@ -378,7 +307,7 @@ rincmat100snp
 
 We can attach an epistatic network based on this incidence matrix to our population using the *incmat* argument:
 
-```{r, results='hide'}
+```{r message=FALSE}
 pop <- attachEpiNet(pop, incmat = rincmat100snp)
 ```
 
@@ -392,7 +321,7 @@ As per the interaction matrix, 4 of the 20 QTLs are not part of any interactions
 
 We can create a 3-way interaction by modifying the matrix such that QTL 20 is included in the first interaction:
 
-```{r, results='hide'}
+```{r message=FALSE}
 # Include the 20th QTL in the first interaction
 mm <- rincmat100snp
 mm[20, 1] <- 1
@@ -411,7 +340,7 @@ The network now includes a single 3-way interaction.
 
 As already shown, it is possible to create purely additive QTLs; similarly, it is also possible to create purely epistatic QTLs. This involves specifying the additive coefficients explicitly, where at least one coefficient is 0; for example:
 
-```{r, eval=FALSE}
+```{r message=FALSE}
 # 20 coefficients, 3 of which are 0
 coefs <- sample(c(rep(0, 3), rnorm(17)), 20)
 pop <- addEffects(pop, effects = coefs)
@@ -419,9 +348,6 @@ getAddCoefs(pop)
 ```
 
 ```{r, echo=FALSE}
-coefs <- sample(c(rep(0, 3), rnorm(17)), 20)
-pop <- addEffects(pop, effects = coefs)
-getAddCoefs(pop)
 foo <- which(getAddCoefs(pop) == 0)
 ```
 
@@ -431,13 +357,13 @@ If we wish to have both purely additive and purely epistatic QTLs in our model, 
 
 Suppose we have 15 QTLs overall. For the sake of simplicity, we’ll make the 15 QTLs the first 15 SNPs in the map:
 
-```{r results=FALSE}
+```{r message=FALSE}
 pop <- Population(pop, QTL = 1:15)
 ```
 
 Let’s make the first 5 QTLs additive-only by giving their SNP IDs to the additive parameter of *attachEpiNet*:
 
-```{r results=FALSE}
+```{r message=FALSE}
 pop <- attachEpiNet(pop, additive = 1:5)
 ```
 
@@ -455,17 +381,11 @@ plot(getEpiNet(pop))
 
 Let’s make QTLs 6-10 epistatic-only by explicitly giving their coefficients as 0 to *addEffects*:
 
-```{r eval=FALSE}
+```{r message=FALSE}
 coefs <- rnorm(15)
 coefs[6:10] <- 0
 pop <- addEffects(pop, effects = coefs)
 getAddCoefs(pop)
-```
-
-```{r echo=FALSE}
-coefs <- rnorm(15)
-coefs[6:10] <- 0
-pop <- addEffects(pop, effects = coefs)
 ```
 
 We now have a population where 5 of the QTLs are purely additive, 5 are purely epistatic and 5 are both additive and epistatic.
@@ -478,7 +398,7 @@ Each QTL can, of course, only have one of three genotypes per individual: the ho
 
 Let's create a new population with 20 QTLs, additive effects and an epistatic network consisting solely of 3-way interactions:
 
-```{r results=FALSE}
+```{r message=FALSE}
 pop <- Population(popSize = 200, map = map100snp, QTL = 20,
                   alleleFrequencies = runif(100),
                   broadH2 = 0.9, narrowh2 = 0.6, traitVar = 40)
@@ -654,7 +574,7 @@ We can thus easily derive both the additive and epistatic components for each in
 Suppose you have a matrix of genotypes (`geno2`) for five individuals not in the population:
 
 ```{r include=FALSE}
-geno2 = matrix(sample(0:2, 100*5, replace = TRUE, prob = c(0.25, 0.5, 0.25)), 5, 100)
+geno2 <- matrix(sample(0:2, 100*5, replace = TRUE, prob = c(0.25, 0.5, 0.25)), 5, 100)
 ```
 
 ```{r}
@@ -682,7 +602,7 @@ Note that this is achieved via the optional *geno* argument in the *getEpistasis
 
 In order to run the simulation, we need to use the *runSim* function.
 
-```{r results="hide"}
+```{r message=FALSE}
 popRun <- runSim(pop, generations = 150)
 ```
 
@@ -727,7 +647,7 @@ Finally, each mating pair produces a number of full-sibling offspring by samplin
 
 We can perform different simulation runs on the same population as follows:
 
-```{r results="hide"}
+```{r message=FALSE}
 popRunRank <- runSim(pop, generations = 150, selection = "ranking")
 popRunBurnIn <- runSim(pop, generations = 150, burnIn = 50,
                        selection = "ranking",
@@ -823,7 +743,7 @@ pedData[201:210, ]
 
 To use this "pedigree dropper", we call *runSim* with the *pedigree* argument:
 
-```{r results="hide"}
+```{r message=FALSE}
 popRunPed <- runSim(pop, pedigree = pedData)
 ```
 
