@@ -6,3 +6,4 @@
 ^README\.Rmd$
 ^LICENSE$
 ^inst/Meta$
+^\.httr-oauth$

@@ -29,7 +29,7 @@ updatePedigree <- function(pop) {
     pop$epiScale <- 1
     epi <- getEpi(pop)
 
-    pop$epiScale <- sqrt(pop$VarG - pop$VarA) / sd(epi)
+    pop$epiScale <- sqrt(pop$VarG - pop$VarA)/sd(epi)
     epi <- epi * pop$epiScale
     pop$epiOffset <- -mean(epi)
     epi <- epi + pop$epiOffset
@@ -38,25 +38,27 @@ updatePedigree <- function(pop) {
   }
 
   if (pop$H2 < 1) {
-    pheno[, 3] <- fitRnd(pheno[, 1] + pheno[, 2], normalisedrnorm, length(pheno[, 1]), sqrt(pop$VarE))
+    pheno[, 3] <- fitRnd(pheno[, 1] + pheno[, 2], normalisedrnorm,
+      length(pheno[, 1]), sqrt(pop$VarE))
     pheno[, 4] <- rowSums(pheno[, 1:3])
   }
 
   # Store total phenotypic value for each member of the population
-  pop$phenotype <- pheno[, 4]
+  if (pop$select == "TGV") {
+    pop$phenotype <- pheno[, 1] + pheno[, 2]
+  } else if (pop$select == "EBV") {
+    pop$phenotype <- pheno[, 5]
+  } else {
+    pop$phenotype <- pheno[, 4]
+  }
 
   sex <- pop$isMale
   sex[pop$isMale] <- "M"
   sex[!pop$isMale] <- "F"
 
-  pop$ped <- data.frame(ID = pop$ID, Sire = rep(0, pop$popSize), Dam = rep(
-    0,
-    pop$popSize
-  ), Additive = pheno[, 1], Epistatic = pheno[, 2], Environmental = pheno
-  [
-    ,
-    3
-  ], Phenotype = pheno[, 4], Sex = sex)
+  pop$ped <- data.frame(ID = pop$ID, Sire = rep(0, pop$popSize), Dam = rep(0,
+    pop$popSize), Additive = pheno[, 1], Epistatic = pheno[, 2], Environmental = pheno[,
+    3], Phenotype = pheno[, 4], EBV = pheno[, 5], Sex = sex)
 
   return(pop)
 }
@@ -180,6 +182,58 @@ fitRnd <- function(vec, fun, ..., tolerance = 0.005, iter.max = 1000) {
   }
 
   return(best)
+}
+
+
+estEffects <- function(pop) {
+  if (!pop$h2Estuser)
+    message("Estimating heritability...")
+
+  # Generate the GRM
+  M <- t(pop$hap[[1]] + pop$hap[[2]])
+  p <- rowMeans(M)/2
+  M <- M - 1
+  P <- 2 * (p - 0.5)
+  Z <- M - P
+  ZtZ <- crossprod(Z)
+  d <- 2 * sum(p * (1 - p))
+  G <- ZtZ/d
+
+  if (!pop$h2Estuser) {
+    # Get eigenvalues and eigenvectors
+    SVD <- eigen(G, symmetric = TRUE)
+
+    # Get h2 estimate
+    y <- (pop$phenotype - mean(pop$phenotype))/sd(pop$phenotype)
+    loglike <- function(x) {
+      ll1 <- (length(y) - 1) * log(x + 1)
+      ll2 <- sum(log(x * SVD$values + 1))
+      ll3 <- (x + 1) * sum(as.numeric(crossprod(y, SVD$vectors)^2)/(x *
+        SVD$values + 1))
+      return(-ll1 + ll2 + ll3)
+    }
+    grad <- function(x) {
+      dll1 <- (length(y) - 1)/(x + 1)
+      dll2 <- sum(SVD$values/(x * SVD$values + 1) + ((as.numeric(crossprod(y,
+        SVD$vectors))/(x * SVD$values + 1))^2) * (1 - SVD$values))
+      return(-dll1 + dll2)
+    }
+    tmp <- constrOptim(1, loglike, grad, matrix(1, 1, 1), 0, method = "BFGS")$par
+    pop$h2Est <- tmp/(tmp + 1)
+  }
+
+  # Get SNP effect estimates
+  message("Estimating SNP effects...")
+  diag(G) <- diag(G) + 0.001
+  lambda <- (1 - pop$h2Est)/pop$h2Est
+  Ginv <- solve(G)
+  Gil <- Ginv * lambda
+  diag(Gil) <- diag(Gil) + 1
+  Gil <- solve(Gil)
+  ebv <- Gil %*% pop$phenotype
+  pop$addEst <- (1/d * Z %*% Ginv %*% ebv)[, 1]
+
+  return(pop)
 }
 
 

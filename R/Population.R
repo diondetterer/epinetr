@@ -54,6 +54,10 @@
 #' autosomal, whether given via the \code{map} parameter or via a VCF
 #' file.
 #'
+#' The \code{Population} object will estimate breeding values once all
+#' necessary effects are given. An optional heritability estimate can
+#' be supplied using the \code{h2est} parameter.
+#'
 #' When supplying an existing \code{Population} object, any additive
 #' effects and epistatic network will be carried over from the
 #' previous population unless new QTLs are supplied.
@@ -62,6 +66,10 @@
 #' epistatic effects will be present; if \code{narrowh2} is 0, no
 #' additive effects will be present; if \code{broadH2} is 1, no
 #' environmental effects will be present.
+#'
+#' The \code{h2est} argument bypasses REML-based heritability estimates
+#' by supplying a user-defined heritability estimate for use in calculating
+#' estimated SNP effects.
 #'
 #' @param pop an optional \code{Population} object to use for default
 #' values
@@ -87,6 +95,7 @@
 #' \code{Population}
 #' @param traitVar initial phenotypic variance within the new
 #' \code{Population}
+#' @param h2est suggested heritability estimate for the new \code{Population}
 #'
 #' @return The constructor creates a new object of class
 #' \code{'Population'}.
@@ -124,81 +133,106 @@
 #' pop2 <- Population(pop2, narrowh2 = 0.45, traitVar = 20)
 #' @seealso \code{\link{addEffects}}, \code{\link{attachEpiNet}},
 #' \code{\link{print.Population}}
-Population <- function(pop = NULL, popSize = NULL, vcf = NULL, map = NULL, QTL = NULL,
-                       genotypes = NULL, literal = TRUE, alleleFrequencies = NULL, broadH2 = NULL,
-                       narrowh2 = NULL, traitVar = NULL) {
-
+Population <- function(pop = NULL, popSize = NULL, vcf = NULL, map = NULL, 
+  QTL = NULL, genotypes = NULL, literal = TRUE, alleleFrequencies = NULL, 
+  broadH2 = NULL, narrowh2 = NULL, traitVar = NULL, h2est = NULL) {
+  
   # Create new Population object
   pop2 <- list()
   class(pop2) <- "Population"
-
+  
   if (!is.null(pop)) {
     testPop(pop)
   }
-
+  
+  pop2$select <- "phenotypic"
+  pop2$h2Estuser <- FALSE
+  
   # Get population size
   pop2 <- addPopSize(pop, pop2, popSize, genotypes, literal)
-
+  
   # Read VCF file
   if (!is.null(vcf)) {
     vcflist <- readVCF(vcf)
-
+    
     if (is.null(map)) {
       map <- vcflist$map
     }
-
+    
     if (is.null(genotypes)) {
       genotypes <- vcflist$genotypes
     }
   }
-
+  
   # Add map to population
   pop2 <- addMap(pop, pop2, map)
-
+  
   # Add QTL
   pop2 <- addQTL(pop, pop2, QTL)
-
+  
   # Add haplotypes to the population
   pop2 <- addHaplotypes(pop, pop2, genotypes, literal, alleleFrequencies)
-
+  
   # Add variances
   pop2 <- addVariances(pop, pop2, traitVar, broadH2, narrowh2)
-
+  
   # Add sexes to the population
   pop2 <- addSex(pop, pop2)
-
+  
   # Add pedigree data frame and animal IDs
   pop2$ID <- 1:pop2$popSize
   zeroes <- rep(0, pop2$popSize)
-  pop2$ped <- data.frame(
-    ID = pop2$ID, Sire = zeroes, Dam = zeroes, Additive = zeroes,
-    Epistatic = zeroes, Environmental = zeroes, Phenotype = zeroes
-  )
-
+  pop2$ped <- data.frame(ID = pop2$ID, Sire = zeroes, Dam = zeroes, Additive = zeroes, 
+    Epistatic = zeroes, Environmental = zeroes, Phenotype = zeroes, 
+    EBV = zeroes)
+  
   # Add additive effects if QTL have not changed and narrow-sense
   # heritability is greater than zero
   if (is.null(QTL) && !is.null(pop$additive) && pop2$h2 > 0) {
-    invisible(utils::capture.output(pop2 <- addEffects(pop2, pop$additive)))
+    # invisible(utils::capture.output(pop2 <- addEffects(pop2,
+    # pop$additive)))
+    pop2 <- suppressMessages(addEffects(pop2, pop$additive))
   }
-
+  
   # Add epistatic network if QTL have not changed and narrow-sense
   # heritability is less than broad-sense heritability
   if (is.null(QTL) && !is.null(pop$epiNet) && pop2$h2 < pop2$H2) {
     pop2$epiNet <- pop$epiNet
     pop2 <- calcEpiScale(pop2)
   }
-
-  # Update pedigree data frame if we have all necessary effects in place
-  if ((!is.null(pop2$additive) || pop2$h2 == 0) && (!is.null(pop2$epiNet) ||
-    pop2$h2 == pop2$H2) || pop2$h2 == 0 && pop2$H2 == 0) {
-    pop2 <- updatePedigree(pop2)
+  
+  # Test for necessary effects
+  necfx <- ((!is.null(pop2$additive) || pop2$h2 == 0) && (!is.null(pop2$epiNet) || 
+    pop2$h2 == pop2$H2) || (pop2$h2 == 0 && pop2$H2 == 0))
+  pop2$addEst <- numeric(nrow(pop2$map))
+  
+  # Verify h2est
+  if (!is.null(h2est) && !(is.numeric(h2est) && h2est > 0 && h2est <= 
+    1)) 
+    stop("h2est must be greater than 0 and less than or equal to 1")
+  
+  # Use any available user-defined heritability estimate
+  if (!is.null(h2est)) {
+    pop2$h2Est <- h2est
+    pop2$h2Estuser <- TRUE
+  } else if (!is.null(pop) && pop$h2Estuser) {
+    pop2$h2Est <- pop$h2Est
+    pop2$h2Estuser <- TRUE
   }
-
+  
+  # Estimate heritability and additive effects if necessary
+  if (necfx) {
+    pop2 <- updatePedigree(pop2)
+    pop2 <- estEffects(pop2)
+    pop2$ped$EBV <- ((pop2$hap[[1]] + pop2$hap[[1]]) %*% matrix(pop2$addEst))[, 
+      1]
+  }
+  
   if (is.null(pop2$additive) && pop2$h2 > 0) {
     message("Run addEffects() to attach additive effects to population.")
   } else if (is.null(pop2$epiNet) && pop2$H2 > pop2$h2) {
     message("Run attachEpiNet() to attach epistatic effects to population.")
   }
-
+  
   return(pop2)
 }

@@ -1,3 +1,5 @@
+globalVariables(c("Generation", "value", "variable"))
+
 #' Plot phenotypic value for a population.
 #'
 #' Plot the phenotypic value for a population over the course of a
@@ -24,41 +26,51 @@
 #' )
 #' pop <- addEffects(pop)
 #' pop <- attachEpiNet(pop)
-#' 
+#'
 #' # Run population in simulation
 #' pop <- runSim(pop)
-#' 
+#'
 #' # Plot population's run
 #' plot(pop)
 #' @seealso \code{\link{Population}}, \code{\link{runSim}},
 #'   \code{\link{addEffects}}, \code{\link{attachEpiNet}}
 plot.Population <- function(x, ...) {
   testPop(x)
-
+  
   if (!x$hasRun) {
     stop("Population must be run prior to plotting")
   }
-
-  # Plot minimum, maximum and mean phenotypic values
-  summ <- x$summaryData
-
-  summ <- data.frame(Minimum = summ[, 1], Mean = summ[, 4], Maximum = summ
-  [
-    ,
-    6
-  ])
-  summ$Generation <- 1:nrow(summ)
-  summ <- reshape2::melt(summ, id = "Generation")
-  names(summ)[2] <- "Range"
-  names(summ)[3] <- "Phenotype"
-  titstr <- paste("Simulation run across", nrow(x$summaryData), "generations")
-  Generation <- NULL
-  Phenotype <- NULL
-  Range <- NULL
-  ggplot2::ggplot(data = summ, ggplot2::aes(
-    x = Generation, y = Phenotype,
-    color = Range
-  )) + ggplot2::geom_line() + ggplot2::ggtitle(titstr)
+  
+  # Plot minimum, maximum and mean phenotypic values summ <-
+  # x$summaryData summ <- data.frame(Minimum = summ[, 1], Mean = summ[,
+  # 4], Maximum = summ [ , 6 ]) summ$Generation <- 1:nrow(summ) summ <-
+  # reshape2::melt(summ, id = 'Generation') names(summ)[2] <- 'Range'
+  # names(summ)[3] <- x$select titstr <- paste('Simulation run across',
+  # nrow(x$summaryData), 'generations') Generation <- NULL Phenotype <-
+  # NULL Range <- NULL ggplot2::ggplot(data = summ, ggplot2::aes( x =
+  # Generation, y = Phenotype, color = Range )) + ggplot2::geom_line() +
+  # ggplot2::ggtitle(titstr)
+  
+  if (x$select == "TGV") {
+    ylabstr <- "True genetic value (TGV)"
+  } else if (x$select == "EBV") {
+    ylabstr <- "Estimated breeding value (EBV)"
+  } else {
+    ylabstr <- "Phenotypic value"
+  }
+  
+  breakfun <- function(x) unique(floor(pretty(seq(0, (max(x) + 1) * 1.1))))
+  
+  foo <- reshape2::melt(data.frame(Minimum = x$summaryData[, 1], Mean = x$summaryData[, 
+    4], Maximum = x$summaryData[, 6], Generation = 1:nrow(x$summaryData)), 
+    id.vars = 4, measure.vars = 1:3)
+  foo$variable <- factor(foo$variable, levels = c("Maximum", "Mean", 
+    "Minimum"))
+  
+  ggplot2::ggplot(data = foo, mapping = ggplot2::aes(x = Generation, 
+    y = value, colour = variable)) + ggplot2::geom_line() + ggplot2::ggtitle(paste("Simulation run across", 
+    nrow(x$summaryData), "generations")) + ggplot2::labs(y = ylabstr) + 
+    ggplot2::theme(legend.title = ggplot2::element_blank()) + ggplot2::scale_x_continuous(breaks = breakfun)
 }
 
 
@@ -85,7 +97,7 @@ plot.Population <- function(x, ...) {
 #'   narrowh2 = 0, traitVar = 40
 #' )
 #' pop <- attachEpiNet(pop)
-#' 
+#'
 #' # Retrieve and plot the epistatic network
 #' epinet <- getEpiNet(pop)
 #' plot(epinet)
@@ -148,6 +160,6 @@ plot.EpiNet <- function(x, ...) {
   igraph::plot.igraph(gg, vertex.label = NA)
   title(main = paste(
     "Epistatic interations between", nrow(x$Incidence),
-    "QTLs"
+    "QTL"
   ))
 }

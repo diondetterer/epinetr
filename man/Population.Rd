@@ -15,7 +15,8 @@ Population(
   alleleFrequencies = NULL,
   broadH2 = NULL,
   narrowh2 = NULL,
-  traitVar = NULL
+  traitVar = NULL,
+  h2est = NULL
 )
 }
 \arguments{
@@ -53,6 +54,8 @@ generating genotypes}
 
 \item{traitVar}{initial phenotypic variance within the new
 \code{Population}}
+
+\item{h2est}{suggested heritability estimate for the new \code{Population}}
 }
 \value{
 The constructor creates a new object of class
@@ -114,6 +117,10 @@ package as \code{map100snp}. Note that all chromosomes must be
 autosomal, whether given via the \code{map} parameter or via a VCF
 file.
 
+The \code{Population} object will estimate breeding values once all
+necessary effects are given. An optional heritability estimate can
+be supplied using the \code{h2est} parameter.
+
 When supplying an existing \code{Population} object, any additive
 effects and epistatic network will be carried over from the
 previous population unless new QTLs are supplied.
@@ -122,6 +129,10 @@ Note that if \code{broadH2} is equal to \code{narrowh2}, no
 epistatic effects will be present; if \code{narrowh2} is 0, no
 additive effects will be present; if \code{broadH2} is 1, no
 environmental effects will be present.
+
+The \code{h2est} argument bypasses REML-based heritability estimates
+by supplying a user-defined heritability estimate for use in calculating
+estimated SNP effects.
 }
 \examples{
 # Construct a new population of size 500, with random allele

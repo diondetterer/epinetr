@@ -56,11 +56,11 @@
 #' @seealso \code{\link{Population}}, \code{\link{attachEpiNet}}
 addEffects <- function(pop, effects = NULL, distrib = rnorm) {
   testPop(pop)
-
+  
   if (pop$h2 == 0) {
     stop("No additive variance in population")
   }
-
+  
   # Initial coefficients
   if (!is.null(effects)) {
     if (length(effects) != length(pop$qtl) || !is.numeric(effects)) {
@@ -71,31 +71,35 @@ addEffects <- function(pop, effects = NULL, distrib = rnorm) {
   } else {
     coef <- distrib(length(pop$qtl))
   }
-
+  
   if (!is.numeric(coef) || length(coef) != length(pop$qtl)) {
     stop("distrib is not a valid distribution")
   }
-
+  
   # Get additive components of phenotypic trait within population
   addComp <- as.vector((pop$hap[[1]] + pop$hap[[2]])[, pop$qtl] %*% coef)
-
+  
   # Scale the coefficients to match user additive variance
-  pop$additive <- coef * sqrt(pop$VarA / var(addComp))
-
+  pop$additive <- coef * sqrt(pop$VarA/var(addComp))
+  
   # Add an offset to set the initial mean to 0
   addComp <- as.vector((pop$hap[[1]] + pop$hap[[2]])[, pop$qtl] %*% pop$additive)
   pop$addOffset <- -mean(addComp)
-
+  
   # Update pedigree data frame if epiNet is present or unneeded (but not
   # both)
-  if ((!is.null(pop$epiNet) || pop$h2 == pop$H2) && (pop$h2 < pop$H2 ||
+  if ((!is.null(pop$epiNet) || pop$h2 == pop$H2) && (pop$h2 < pop$H2 || 
     is.null(pop$epiNet))) {
+    pop$addEst <- numeric(nrow(pop$map))
     pop <- updatePedigree(pop)
+    pop <- estEffects(pop)
+    pop$ped$EBV <- ((pop$hap[[1]] + pop$hap[[1]]) %*% matrix(pop$addEst))[, 
+      1]
   }
-
+  
   if (is.null(pop$epiNet) && pop$H2 > pop$h2) {
     message("Run attachEpiNet() to attach epistatic effects to population.")
   }
-
+  
   return(pop)
 }

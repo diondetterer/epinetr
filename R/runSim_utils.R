@@ -110,21 +110,32 @@ prepPed <- function(pedigree) {
 }
 
 
-prepPop <- function(pop, generations, selection, burnIn, truncSire, truncDam,
-                    roundsSire, roundsDam, litterDist, breedSire) {
+prepPop <- function(pop, generations, selection, fitness, burnIn, truncSire,
+  truncDam, roundsSire, roundsDam, litterDist, breedSire) {
 
   # Validate number of generations
-  if (!is.numeric(generations) || length(generations) != 1 || generations %% 1 !=
+  if (!is.numeric(generations) || length(generations) != 1 || generations%%1 !=
     0 || generations < 2) {
     stop("Number of generations must be an integer greater than 1")
   }
   pop$numGen <- generations
 
-  # Validate selection
+  # Validate selection type
   pop$ranking <- (tolower(trimws(selection)) == "ranking")
 
+  # Validate selection criterion
+  if (tolower(trimws(fitness)) == "tgv") {
+    pop$select <- "TGV"
+    pop$phenotype <- pop$ped$Additive + pop$ped$Epistatic
+  } else if (tolower(trimws(fitness)) == "ebv") {
+    pop$select <- "EBV"
+    pop$phenotype <- pop$ped$EBV
+  } else {
+    pop$select <- "phenotypic"
+  }
+
   # Validate burn-in period
-  if (length(burnIn) != 1 || !is.numeric(burnIn) || burnIn %% 1 != 0 ||
+  if (length(burnIn) != 1 || !is.numeric(burnIn) || burnIn%%1 != 0 ||
     burnIn < 0 || burnIn > pop$numGen) {
     stop("Burn-in length must be an integer between 0 and the number of generations to run")
   }
@@ -145,7 +156,7 @@ prepPop <- function(pop, generations, selection, burnIn, truncSire, truncDam,
 
   # Validate rounds per sire and dam
   if (length(roundsSire) != 1 || length(roundsDam) != 1 || !is.numeric(roundsSire) ||
-    !is.numeric(roundsDam) || roundsSire %% 1 != 0 || roundsDam %% 1 !=
+    !is.numeric(roundsDam) || roundsSire%%1 != 0 || roundsDam%%1 !=
     0 || roundsSire < 1 || roundsDam < 1 || roundsSire > pop$numGen ||
     roundsDam > pop$numGen) {
     stop("Sire and dam rounds incorrectly specified")
@@ -158,7 +169,7 @@ prepPop <- function(pop, generations, selection, burnIn, truncSire, truncDam,
     0)) {
     stop("Invalid litter distribution")
   }
-  pop$litterDist <- litterDist / sum(litterDist)
+  pop$litterDist <- litterDist/sum(litterDist)
 
   # Validate number of times a sire can breed per round
   if (length(breedSire) != 1 || !is.numeric(breedSire) || breedSire <
@@ -174,15 +185,14 @@ prepPop <- function(pop, generations, selection, burnIn, truncSire, truncDam,
   # Calculate expected number of offspring
   pop$expectedOffspring <- (pop$numGen - 1) * 0.5 * pop$truncFemale *
     pop$popSize * sum(pop$litterDist * 0:(length(pop$litterDist) -
-      1))
+    1))
 
   # Expand pedigree data frame
   zeroes <- rep(0, pop$popSize + pop$expectedOffspring)
-  tempped <- data.frame(
-    ID = zeroes, Sire = zeroes, Dam = zeroes, Additive = zeroes,
-    Epistatic = zeroes, Environmental = zeroes, Phenotype = zeroes, Sex = as.character(rep("X", pop$popSize + pop$expectedOffspring)), Round = zeroes,
-    stringsAsFactors = FALSE
-  )
+  tempped <- data.frame(ID = zeroes, Sire = zeroes, Dam = zeroes, Additive = zeroes,
+    Epistatic = zeroes, Environmental = zeroes, Phenotype = zeroes,
+    EBV = zeroes, Sex = as.character(rep("X", pop$popSize + pop$expectedOffspring)),
+    Round = zeroes, stringsAsFactors = FALSE)
   components <- getComponents(pop)
   components$Sex <- as.character(components$Sex)
   tempped[1:pop$popSize, ] <- components
@@ -298,20 +308,20 @@ getPheno <- function(pop, geno = NULL) {
     geno <- (pop$hap[[1]] + pop$hap[[2]])
   }
 
-  geno <- geno[, pop$qtl]
+  genotrim <- geno[, pop$qtl]
 
   dimensions <- dim(geno)
 
   zeros <- rep(0, dimensions[1])
 
   if (pop$h2 > 0 && !is.null(pop$additive)) {
-    add <- (geno %*% t(t(pop$additive))) + pop$addOffset
+    add <- (genotrim %*% matrix(pop$additive)) + pop$addOffset
   } else {
     add <- zeros
   }
 
   if (pop$h2 < pop$H2 && !is.null(pop$epiNet)) {
-    epi <- getEpi(pop, geno = geno) * pop$epiScale + pop$epiOffset
+    epi <- getEpi(pop, geno = genotrim) * pop$epiScale + pop$epiOffset
   } else {
     epi <- zeros
   }
@@ -324,5 +334,7 @@ getPheno <- function(pop, geno = NULL) {
 
   tot <- add + epi + env
 
-  return(matrix(c(add, epi, env, tot), length(add), 4))
+  ebv <- geno %*% matrix(pop$addEst)
+
+  return(matrix(c(add, epi, env, tot, ebv), length(add), 5))
 }

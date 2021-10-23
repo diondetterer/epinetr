@@ -57,6 +57,11 @@
 #' \code{breedSire}. Random selection occurs in the same manner, but all
 #' probabilities are uniform. During any initial \code{burnIn} period, random
 #' selection is enforced.
+#' 
+#' \code{fitness} specifies how fitness is determined for the purposes of selection:
+#' 'phenotypic' (the default) selects based on the phenotype while 'TGV' selects by
+#' ignoring environmental noise; 'EBV' selects based on estimated breeding values
+#' using estimated SNP effects.
 #'
 #' Each mating pair produces a number of full-sibling offspring by sampling
 #' once from the litter-size probability mass function given by \code{litterDist}
@@ -98,6 +103,9 @@
 #'   generations to iterate through in the simulation
 #' @param selection an optional string specifying random (the default) or
 #'   linear ranking selection
+#' @param fitness an optional string specifying whether selection takes
+#'   place based on phenotypic value (the default), true genetic value or
+#'   estimated breeding value
 #' @param burnIn an optional integer giving the initial number of
 #'   generations in which to use random selection without truncation,
 #'   even when linear ranking selection or truncation is otherwise employed
@@ -156,9 +164,9 @@
 #' \code{\link{attachEpiNet}}, \code{\link{print.Population}},
 #' \code{\link{plot.Population}}, \code{\link{loadGeno}}
 runSim <- function(pop, pedigree = NULL, generations = 2, selection = "random",
-                   burnIn = 0, truncSire = 1, truncDam = 1, roundsSire = 1, roundsDam = 1,
-                   litterDist = c(0, 0, 1), breedSire = 10, mutation = 10^-9, recombination = NULL,
-                   allGenoFileName = NULL) {
+  fitness = "phenotypic", burnIn = 0, truncSire = 1, truncDam = 1, roundsSire = 1,
+  roundsDam = 1, litterDist = c(0, 0, 1), breedSire = 10, mutation = 10^-9,
+  recombination = NULL, allGenoFileName = NULL) {
   testPop(pop)
 
   if (pop$h2 > 0 && is.null(pop$additive)) {
@@ -177,7 +185,7 @@ runSim <- function(pop, pedigree = NULL, generations = 2, selection = "random",
 
     message("Validating pedigree data...")
     pedigree <- prepPed(pedigree)
-    # message("Done.\n")
+    # message('Done.\n')
 
     # Sort the pedigree
     message("Sorting pedigree data into generations...")
@@ -188,14 +196,14 @@ runSim <- function(pop, pedigree = NULL, generations = 2, selection = "random",
     matings <- foo$matings
     message(paste("Found", length(matings), "generations."))
 
-    # Ensure that all first-generation pedigree IDs are present in the
-    # population
+    # Ensure that all first-generation pedigree IDs are present in
+    # the population
     if (!all(pedigree$ID[1:matings[1]] %in% pop$ID)) {
       stop("All pedigree IDs must be present in the population")
     }
 
-    # Remove any individuals in the population not in the pedigree's first
-    # generation
+    # Remove any individuals in the population not in the pedigree's
+    # first generation
     cull <- which(!(pop$ID %in% pedigree$ID[1:matings[1]]))
     if (length(cull) != 0) {
       pop$ID <- pop$ID[-cull]
@@ -219,14 +227,13 @@ runSim <- function(pop, pedigree = NULL, generations = 2, selection = "random",
     } else {
       # Copy phenotypic components to matching pedigree IDs
       components <- getComponents(pop)
-      pedigree[, 4:7] <- components[
-        match(pedigree$ID, components$ID),
-        4:7
-      ]
+      pedigree[, 4:7] <- components[match(pedigree$ID, components$ID),
+        4:7]
       pop$ped <- pedigree
     }
 
-    # Zero-out all phenotypic data beyond the pedigree's first generation
+    # Zero-out all phenotypic data beyond the pedigree's first
+    # generation
     pop$ped[(matings[1] + 1):nrow(pop$ped), 4:7] <- 0
 
     # Add round for each individual
@@ -239,10 +246,8 @@ runSim <- function(pop, pedigree = NULL, generations = 2, selection = "random",
     }
   } else {
     # Validate the arguments and pass parameters onto population
-    pop <- prepPop(
-      pop, generations, selection, burnIn, truncSire,
-      truncDam, roundsSire, roundsDam, litterDist, breedSire
-    )
+    pop <- prepPop(pop, generations, selection, fitness, burnIn, truncSire,
+      truncDam, roundsSire, roundsDam, litterDist, breedSire)
 
     # Counter for animal IDs
     IDcounter <- pop$popSize + 1
@@ -260,10 +265,10 @@ runSim <- function(pop, pedigree = NULL, generations = 2, selection = "random",
   }
   pop$mutProb <- 10^-9
 
-  # Get recombination probabilies or generate if not given
+  # Get recombination probabilities or generate if not given
   if (is.null(recombination)) {
     numChr <- length(levels(as.factor(pop$map$chr)))
-    recombination <- rnorm(nrow(pop$map) - numChr, mean = 2 / 3000, sd = 1 / 7000)
+    recombination <- rnorm(nrow(pop$map) - numChr, mean = 2/3000, sd = 1/7000)
     recombination[recombination < 0] <- 0
   }
   pop$recProb <- getRecProb(recombination, pop$map)
@@ -279,8 +284,15 @@ runSim <- function(pop, pedigree = NULL, generations = 2, selection = "random",
 
   # Print relevant statistics
   message("Completed generation 1")
-  message(paste("Mean phenotypic value:", mean(pop$phenotype)))
-  message(paste("Maximum phenotypic value:", max(pop$phenotype), "\n"))
+  if (pop$select == "TGV") {
+    ylabstr <- "TGV:"
+  } else if (pop$select == "EBV") {
+    ylabstr <- "EBV:"
+  } else {
+    ylabstr <- "phenotypic value:"
+  }
+  message(paste("Mean", ylabstr, mean(pop$phenotype)))
+  message(paste("Maximum", ylabstr, max(pop$phenotype), "\n"))
 
   # Generation loop
   for (i in 2:pop$numGen) {
@@ -343,45 +355,39 @@ runSim <- function(pop, pedigree = NULL, generations = 2, selection = "random",
 
       # Select based on phenotype ranking
       if (pop$ranking & (i > pop$burnIn)) {
-        # Select sires for each pair within breeding count restriction
-        males <- getMales(males, numFemales, rep(
-          pop$sireBreed,
-          pop$popSize
-        ))
+        # Select sires for each pair within breeding count
+        # restriction
+        males <- getMales(males, numFemales, rep(pop$sireBreed,
+          pop$popSize))
 
         # Select dams for each pair
-        females <- sample(females, length(males),
-          prob = ranking(numFemales),
-          replace = FALSE
-        )
+        females <- sample(females, length(males), prob = ranking(numFemales),
+          replace = FALSE)
 
         # Select randomly
       } else {
-        # Randomly select within male population
-        # males <- sample(which(pop$isMale), numMales, replace = FALSE)
+        # Randomly select within male population males <-
+        # sample(which(pop$isMale), numMales, replace = FALSE)
 
-        # Select sires for each pair within breeding count restriction
-        males <- getMales(males, numFemales, rep(
-          pop$sireBreed,
-          pop$popSize
-        ), random = TRUE)
+        # Select sires for each pair within breeding count
+        # restriction
+        males <- getMales(males, numFemales, rep(pop$sireBreed,
+          pop$popSize), random = TRUE)
 
         # Randomly select dams for sires
         females <- sample(which(!pop$isMale), length(males), replace = FALSE)
       }
 
-      # Determine how many offspring for each pairing; remove pairings where
-      # no offspring result
+      # Determine how many offspring for each pairing; remove
+      # pairings where no offspring result
       valid <- (pop$litterDist != 0)
       outcomes <- (0:(length(pop$litterDist) - 1))[valid]
       probs <- pop$litterDist[valid]
       if (max(probs) == 1) {
         numOffspring <- rep(outcomes, length(females))
       } else {
-        numOffspring <- sample(outcomes, length(females),
-          prob = probs,
-          replace = TRUE
-        )
+        numOffspring <- sample(outcomes, length(females), prob = probs,
+          replace = TRUE)
       }
       offindex <- (numOffspring > 0)
       males <- males[offindex]
@@ -394,12 +400,10 @@ runSim <- function(pop, pedigree = NULL, generations = 2, selection = "random",
 
       # Create offspring pedigree data frame
       zeroes <- rep(0, length(males))
-      offped <- data.frame(
-        ID = zeroes, Sire = zeroes, Dam = zeroes,
+      offped <- data.frame(ID = zeroes, Sire = zeroes, Dam = zeroes,
         Additive = zeroes, Epistatic = zeroes, Environmental = zeroes,
-        Phenotype = zeroes, Sex = sample(c("M", "F"), length(males), replace = TRUE), Round = zeroes + i,
-        stringsAsFactors = FALSE
-      )
+        Phenotype = zeroes, EBV = zeroes, Sex = sample(c("M", "F"),
+          length(males), replace = TRUE), Round = zeroes + i, stringsAsFactors = FALSE)
     }
 
     # Allocate space for this generation
@@ -437,7 +441,8 @@ runSim <- function(pop, pedigree = NULL, generations = 2, selection = "random",
 
     # Output sire and dam haplotypes
     if (pop$allGenotypes) {
-      serialMat(hap2geno(list(offspring[[1]], offspring[[2]])), allGenoFileName, append = TRUE)
+      serialMat(hap2geno(list(offspring[[1]], offspring[[2]])), allGenoFileName,
+        append = TRUE)
     }
 
     # Evaluate this generation
@@ -449,25 +454,33 @@ runSim <- function(pop, pedigree = NULL, generations = 2, selection = "random",
 
     # Append phenotype to pedigree and ID to population
     if (pedDropper) {
-      pop$ped[index1:index2, 4:7] <- pheno
+      pop$ped[index1:index2, 4:8] <- pheno
       pop$ID <- c(pop$ID, pop$ped[index1:index2, 1])
-      pop$isMale <- c(pop$isMale, (pop$ped$Sex[index1:index2] == "M"))
+      pop$isMale <- c(pop$isMale, (pop$ped$Sex[index1:index2] ==
+        "M"))
 
       # Update population size
       pop$popSize <- length(pop$ID)
     } else {
-      offped[, 4:7] <- pheno
+      offped[, 4:8] <- pheno
       pop$ID <- c(pop$ID, offped$ID)
       sexOffspring <- (offped$Sex == "M")
       pop$isMale <- c(pop$isMale, sexOffspring)
     }
 
     # Append phenotype to population
-    pop$phenotype <- c(pop$phenotype, pheno[, 4])
+    if (pop$select == "TGV") {
+      foo <- pheno[, 1] + pheno[, 2]
+    } else if (pop$select == "EBV") {
+      foo <- pheno[, 5]
+    } else {
+      foo <- pheno[, 4]
+    }
+    pop$phenotype <- c(pop$phenotype, foo)
 
-    # Append sex to population
-    # sexOffspring <- sample(c(TRUE, FALSE), length(males), replace = TRUE)
-    # pop$isMale <- c(pop$isMale, sexOffspring)
+    # Append sex to population sexOffspring <- sample(c(TRUE, FALSE),
+    # length(males), replace = TRUE) pop$isMale <- c(pop$isMale,
+    # sexOffspring)
 
     if (!pedDropper) {
       # Append rounds to survive
@@ -481,11 +494,10 @@ runSim <- function(pop, pedigree = NULL, generations = 2, selection = "random",
       if (length(pedindex1) == 0 || length(pop$ped$ID) - pedindex1[1] +
         1 < nrow(offped)) {
         zeroes <- rep(0, ceiling(pop$expectedOffspring))
-        foo <- data.frame(
-          ID = zeroes, Sire = zeroes, Dam = zeroes,
+        foo <- data.frame(ID = zeroes, Sire = zeroes, Dam = zeroes,
           Additive = zeroes, Environmental = zeroes, Epistatic = zeroes,
-          Phenotype = zeroes, Sex = rep("X", ceiling(pop$expectedOffspring)), Round = zeroes
-        )
+          Phenotype = zeroes, EBV = zeroes, Sex = rep("X", ceiling(pop$expectedOffspring)),
+          Round = zeroes)
         pop$ped <- rbind(pop$ped, foo)
       }
 
@@ -515,10 +527,12 @@ runSim <- function(pop, pedigree = NULL, generations = 2, selection = "random",
         pop$roundsCount <- pop$roundsCount[-cull]
       }
 
-      # If population is now too large, further cull individuals accordingly
+      # If population is now too large, further cull individuals
+      # accordingly
       if (length(pop$isMale) > pop$popSize) {
-        # If we're within the burn-in period or selection is random, remove
-        # individuals randomly, else remove those with lowest phenotype
+        # If we're within the burn-in period or selection is random,
+        # remove individuals randomly, else remove those with lowest
+        # phenotype
         if (i <= pop$burnIn || !pop$ranking) {
           index <- sample(1:length(pop$isMale), pop$popSize, replace = FALSE)
         } else {
@@ -542,8 +556,8 @@ runSim <- function(pop, pedigree = NULL, generations = 2, selection = "random",
 
     # Print relevant statistics
     message(paste("Completed generation", i))
-    message(paste("Mean phenotypic value:", mean(pop$phenotype)))
-    message(paste("Maximum phenotypic value:", max(pop$phenotype), "\n"))
+    message(paste("Mean", ylabstr, mean(pop$phenotype)))
+    message(paste("Maximum", ylabstr, max(pop$phenotype), "\n"))
   }
 
   # Trim pedigree data

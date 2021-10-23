@@ -13,7 +13,7 @@
 #' @author Dion Detterer, Paul Kwan, Cedric Gondro
 #' @importFrom graphics title
 #' @importFrom Rcpp sourceCpp
-#' @importFrom stats cov rnorm runif sd var
+#' @importFrom stats constrOptim cov rnorm runif sd var
 #' @importFrom methods is
 #' @useDynLib epinetr, .registration = TRUE
 #' @name epinetr

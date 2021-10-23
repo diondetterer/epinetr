@@ -17,19 +17,19 @@
 #' @examples
 #' # Build a population
 #' pop <- Population(
-#'   popSize = 100, map = map100snp, QTL = 20,
+#'   popSize = 10, map = map100snp, QTL = 20,
 #'   alleleFrequencies = runif(100), broadH2 = 0.9,
 #'   narrowh2 = 0.5, traitVar = 40
 #' )
 #' pop <- addEffects(pop)
 #' pop <- attachEpiNet(pop)
-#' 
+#'
 #' # Print the initial population
 #' pop
-#' 
+#'
 #' # Run population in simulation
-#' pop2 <- runSim(pop, generations = 150)
-#' 
+#' pop2 <- runSim(pop, generations = 50)
+#'
 #' # Print the population following the simulation
 #' pop2
 #' @seealso \code{\link{Population}}, \code{\link{addEffects}},
@@ -70,7 +70,7 @@ print.Population <- function(x, ...) {
   if (length(x$qtl) <= 100) {
     cat(
       "Using", length(x$alleleFreq), "SNPs with", length(x$qtl),
-      "QTLs:\n"
+      "QTL:\n"
     )
 
     for (i in x$qtl) cat(x$map$SNP[i], " ")

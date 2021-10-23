@@ -9,6 +9,7 @@ runSim(
   pedigree = NULL,
   generations = 2,
   selection = "random",
+  fitness = "phenotypic",
   burnIn = 0,
   truncSire = 1,
   truncDam = 1,
@@ -33,6 +34,10 @@ generations to iterate through in the simulation}
 
 \item{selection}{an optional string specifying random (the default) or
 linear ranking selection}
+
+\item{fitness}{an optional string specifying whether selection takes
+place based on phenotypic value (the default), true genetic value or
+estimated breeding value}
 
 \item{burnIn}{an optional integer giving the initial number of
 generations in which to use random selection without truncation,
@@ -129,6 +134,11 @@ they are each only replaced a maximum number of times as specified by
 \code{breedSire}. Random selection occurs in the same manner, but all
 probabilities are uniform. During any initial \code{burnIn} period, random
 selection is enforced.
+
+\code{fitness} specifies how fitness is determined for the purposes of selection:
+'phenotypic' (the default) selects based on the phenotype while 'TGV' selects by
+ignoring environmental noise; 'EBV' selects based on estimated breeding values
+using estimated SNP effects.
 
 Each mating pair produces a number of full-sibling offspring by sampling
 once from the litter-size probability mass function given by \code{litterDist}

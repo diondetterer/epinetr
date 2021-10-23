@@ -93,27 +93,27 @@
 #' }
 #' @seealso \code{\link{Population}}, \code{\link{getEpiNet}},
 #' \code{\link{plot.EpiNet}}, \code{\link{addEffects}}
-attachEpiNet <- function(pop, scaleFree = FALSE, k = 2, m = 1, additive = 0,
-                         incmat = NULL) {
+attachEpiNet <- function(pop, scaleFree = FALSE, k = 2, m = 1, additive = 0, 
+  incmat = NULL) {
   testPop(pop)
-
+  
   if (pop$h2 == pop$H2) {
     stop("No epistatic interaction in population")
   }
-
+  
   n <- length(pop$qtl)
-
+  
   if (is.matrix(incmat)) {
     if (nrow(incmat) != n) {
       stop("Number of rows in incmat must match number of QTL in pop")
     }
-
+    
     # If incmat is a matrix, use that as a user-defined network
     pop$epiNet <- userNetwork(incmat)
   } else {
     pop$epiNet <- buildNetwork(n, k, m, additive, scaleFree, pop)
   }
-
+  
   # Set up powers of 3 in the incidence matrix
   pow <- function(x) {
     indices <- which(x != 0)
@@ -121,19 +121,23 @@ attachEpiNet <- function(pop, scaleFree = FALSE, k = 2, m = 1, additive = 0,
     return(x)
   }
   pop$epiNet$Incidence <- apply(pop$epiNet$Incidence, 2, pow)
-
+  
   # Calculate offset and scaling factor for epistasis
   pop <- calcEpiScale(pop)
-
+  
   # Calculate phenotypic components for pedigree data frame if additive
   # effects are present or unneeded (but not both)
   if ((!is.null(pop$additive) || pop$h2 == 0) && (pop$h2 > 0 || is.null(pop$additive))) {
+    pop$addEst <- numeric(nrow(pop$map))
     pop <- updatePedigree(pop)
+    pop <- estEffects(pop)
+    pop$ped$EBV <- ((pop$hap[[1]] + pop$hap[[1]]) %*% matrix(pop$addEst))[, 
+      1]
   }
-
+  
   if (is.null(pop$additive) && pop$h2 > 0) {
     message("Run addEffects() to attach additive effects to population.")
   }
-
+  
   return(pop)
 }
