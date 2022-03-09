@@ -32,3 +32,5 @@ Meta
 *.dll
 src-i386
 src-x64
+/doc/
+/Meta/
