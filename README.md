@@ -6,6 +6,10 @@ An R Package for Epistastic Network Modelling with Forward-Time Simulation
 
 Using *epinetr*, you can test  the impacts of various mixes of additive and epistatic effects against different population structures and selection criteria on populations. Our primary goal is to investigate the relationship between biological epistasis in individuals and additive models in populations.
 
+## Important note
+
+Version 0.96 corrects an error that incorrectly calculated estimated breeding values (EBVs) for the initial population. Please do not rely on Round 1 EBVs from versions prior to 0.96.
+
 ## Installation
 Installation is straightforward, provided you already have the `devtools` package installed. Simply run the command
 
